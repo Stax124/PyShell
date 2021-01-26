@@ -1,0 +1,6 @@
+/.vscode
+/env
+/plugins
+/test.py
+/test.txt
+/__pycache__

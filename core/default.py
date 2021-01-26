@@ -1,0 +1,97 @@
+from functions import functions
+import os
+import sys
+import json
+import platform
+import argparse
+import threading
+import subprocess
+
+def _config(shell, *querry):
+    if querry == ():
+        print(json.dumps(shell.config.config, indent=4))
+
+def _ls(shell, *querry):
+    return subprocess.check_output("dir", shell=True, universal_newlines=True)
+
+def _platform(shell, *querry):
+    print(platform.system())
+
+def _executable(shell, *querry):
+    print(sys.executable)
+
+def _whoami(shell, *querry):
+    try:
+        if platform.system() == "Windows":
+            USER = os.environ["USERNAME"]
+        else:
+            USER = os.environ["USER"]
+    except:
+        USER = "UNKNOWN"
+
+    print(USER)
+
+def _domain(shell, *querry):
+    try:
+        if platform.system() == "Windows":
+            USERDOMAIN = os.environ["USERDOMAIN"]
+        else:
+            USERDOMAIN = os.environ["NAME"]
+    except:
+        USERDOMAIN = "UNKNOWN"
+
+    print(USERDOMAIN)
+
+def _pwd(shell, *querry):
+    print(os.getcwd())
+
+def _title(shell, *querry):
+    subprocess.run(f'title {" ".join(querry)}', shell=True)
+
+def _read(shell, *querry):
+    fparser = argparse.ArgumentParser(prog="read")
+    fparser.add_argument("filename", help="Target filename")
+    fparser.add_argument("-n", dest="number",help="Number of lines", default=-1, type=int)
+    try:
+        fargs = fparser.parse_args(querry)
+    except SystemExit:
+        return
+
+    file = open(fargs.filename, encoding="utf-8")
+    if fargs.number == -1:
+        print(file.read())
+    else:
+        for i in range(fargs.number):
+            content = file.readline(i)
+            print(content)
+    file.close()
+
+def _clear(shell, *querry):
+    if platform.system() == "Windows":
+        subprocess.run("cls", shell=True)
+    else:
+        subprocess.run("clear", shell=True)
+
+def _theads(shell, *querry):
+    print(
+        f"Active threads: {threading.activeCount()}\n")
+    for t in threading.enumerate():
+        print("{:<30} {:<30}".format(t.name, "active" if t.is_alive() else "stopped"))
+    return
+
+def _exit(shell, *querry):
+    sys.exit(0)
+
+functions["config"] = _config
+functions["ls"] = _ls
+functions["platform"] = _platform
+functions["executable"] = _executable
+functions["whoami"] = _whoami
+functions["domain"] = _domain
+functions["pwn"] = _pwd
+functions["title"] = _title
+functions["read"] = _read
+functions["clear"] = _clear
+functions["cls"] = _clear
+functions["threads"] = _theads
+functions["exit"] = _exit
