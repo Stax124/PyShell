@@ -14,6 +14,10 @@ def _config(shell, *querry):
 def _ls(shell, *querry):
     return subprocess.check_output("dir", shell=True, universal_newlines=True)
 
+def _plugins(shell, *querry):
+    for plugin in shell.manager.getAllPlugins():
+        print(plugin.name)
+
 def _platform(shell, *querry):
     print(platform.system())
 
@@ -95,3 +99,4 @@ functions["clear"] = _clear
 functions["cls"] = _clear
 functions["threads"] = _theads
 functions["exit"] = _exit
+functions["plugins"] = _plugins

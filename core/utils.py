@@ -5,11 +5,11 @@ def time_reformat(duration: int):
 
         duration = []
         if days > 0:
-            duration.append('{} days'.format(days))
+            duration.append('{} days'.format(int(days)))
         if hours > 0:
-            duration.append('{} hours'.format(hours))
+            duration.append('{} hours'.format(int(hours)))
         if minutes > 0:
-            duration.append('{} minutes'.format(minutes))
+            duration.append('{} minutes'.format(int(minutes)))
         if seconds > 0:
             duration.append('{} seconds'.format(seconds))
 

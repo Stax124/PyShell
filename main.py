@@ -33,7 +33,7 @@ for plugin in manager.getAllPlugins():
 
 #region Parser
 parser = argparse.ArgumentParser()
-parser.add_argument("-c", "--command", help="Execute following command")
+parser.add_argument("command", help="Execute following command", nargs="*")
 parser.add_argument("-d", "--directory", help="Start in specified directory")
 args = parser.parse_args()
 #endregion
@@ -114,6 +114,7 @@ class Shell(PromptSession):
         self.config.fallback = {
             "aliases": {}
         }
+        self.manager = manager
         self.completer = ThreadedCompleter(path_completer.PathCompleter())
         
         super().__init__(completer=self.completer,
