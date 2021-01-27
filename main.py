@@ -35,7 +35,11 @@ for plugin in manager.getAllPlugins():
 parser = argparse.ArgumentParser()
 parser.add_argument("command", help="Execute following command", nargs="*")
 parser.add_argument("-d", "--directory", help="Start in specified directory")
-args = parser.parse_args()
+
+if not sys.stdin.isatty():
+    args = parser.parse_args(sys.stdin.readlines())
+else:
+    args = parser.parse_args()
 #endregion
 
 def run_command(command):
@@ -115,7 +119,10 @@ class Shell(PromptSession):
             "aliases": {}
         }
         self.manager = manager
-        self.completer = ThreadedCompleter(path_completer.PathCompleter())
+        if not args.command:
+            self.completer = ThreadedCompleter(path_completer.PathCompleter())
+        else:
+            self.completer = None
         
         super().__init__(completer=self.completer,
                          complete_while_typing=True,
@@ -180,6 +187,10 @@ class Shell(PromptSession):
 
     def run(self):
         self.loadconfig()
+
+        if args.command:
+            self.resolver(" ".join(args.command))
+            return
 
         while True:
             try:
