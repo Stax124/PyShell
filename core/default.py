@@ -86,7 +86,11 @@ def _theads(shell, *querry):
 def _exit(shell, *querry):
     sys.exit(0)
 
+def _cd(shell, *querry):
+    os.chdir(" ".join(querry))
+
 functions["config"] = _config
+functions["cd"] = _cd
 functions["ls"] = _ls
 functions["platform"] = _platform
 functions["executable"] = _executable

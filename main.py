@@ -78,16 +78,6 @@ def isadmin() -> bool:
 
     return _is_admin
 
-class c:
-    header = '\033[95m'
-    okblue = '\033[94m'
-    okgreen = '\033[92m'
-    warning = '\033[93m'
-    fail = '\033[91m'
-    end = '\033[0m'
-    bold = '\033[1m'
-    underline = '\033[4m'
-
 class Shell(PromptSession):
     def envirotize(self, string) -> str:
         "Applies Environment variables"
@@ -130,6 +120,7 @@ class Shell(PromptSession):
         return string        
 
     def __init__(self, verbose=False):
+        print("initializating Shell")
         try:
             if args.directory:
                 os.chdir(args.directory)
@@ -234,10 +225,9 @@ class Shell(PromptSession):
             self.resolver(" ".join(args.command))
             return
 
-        _prompt = HTML(self.config["prompt"].replace("USERDOMAIN", USERDOMAIN).replace("USER", USER).replace("PATH",os.getcwd()).replace("ROOT","#" if isadmin() == True else "$"))
         while True:
             try:
-                self.resolver(self.prompt(_prompt))
+                self.resolver(self.prompt(HTML(self.config["prompt"].replace("USERDOMAIN", USERDOMAIN).replace("USER", USER).replace("PATH",os.getcwd()).replace("ROOT","#" if isadmin() == True else "$"))))
             except KeyboardInterrupt:
                 sys.exit(0)
 
