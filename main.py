@@ -6,6 +6,8 @@ import argparse
 import subprocess
 import math
 import traceback
+import ctypes
+import platform
 #endregion
 
 #region Prompt-toolkit
@@ -13,7 +15,8 @@ from prompt_toolkit import PromptSession
 from prompt_toolkit.enums import EditingMode
 from prompt_toolkit.output.color_depth import ColorDepth
 from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
-from prompt_toolkit.completion import ThreadedCompleter
+from prompt_toolkit.completion import ThreadedCompleter, NestedCompleter, merge_completers
+from prompt_toolkit.styles import Style
 from prompt_toolkit import HTML
 #endregion
 
@@ -42,6 +45,18 @@ else:
     args = parser.parse_args()
 #endregion
 
+#region CONSTATNTS
+try:
+    if platform.system() == "Windows":  USER = os.environ["USERNAME"]
+    else:                               USER = os.environ["USER"]
+except:                                 USER = "UNKNOWN"
+
+try:
+    if platform.system() == "Windows":  USERDOMAIN = os.environ["USERDOMAIN"]
+    else:                               USERDOMAIN = os.environ["NAME"]
+except:                                 USERDOMAIN = "UNKNOWN"
+#endregion
+
 def run_command(command):
     process = subprocess.Popen(shlex.split(command), stdout=subprocess.PIPE, shell=True, universal_newlines=True)
     msg = ""
@@ -52,6 +67,16 @@ def run_command(command):
         if output:
             msg += output
     return msg
+
+def isadmin() -> bool:
+    "Ask if run with elevated privileges"
+    try:
+        _is_admin = os.getuid() == 0
+
+    except AttributeError:
+        _is_admin = ctypes.windll.shell32.IsUserAnAdmin() != 0
+
+    return _is_admin
 
 class c:
     header = '\033[95m'
@@ -102,10 +127,7 @@ class Shell(PromptSession):
         if string != rebuild:
             string = rebuild
 
-        return string
-
-    def loadconfig(self):
-        self.config.load()
+        return string        
 
     def __init__(self, verbose=False):
         try:
@@ -115,22 +137,44 @@ class Shell(PromptSession):
             pass
 
         self.config = cfg.Config(verbose=verbose)
+        self.config.load()
         self.config.fallback = {
-            "aliases": {}
+            "aliases": {},
+            "prompt": f"\n┏━━(<user>USER</user> at <user>USERDOMAIN</user>)━[<path>PATH</path>]\n┗━<pointer>ROOT</pointer> ",
+            "style": {
+                # Default style
+                "": "greenyellow",
+
+                # Specific style
+                "pointer": "#ff4500",
+                "path": "aqua",
+                "user": "#ff4500",
+
+                # Completer
+                "completion-menu.completion": "bg:#000000 #ffffff",
+                "completion-menu.completion.current": "bg:#00aaaa #000000",
+                "scrollbar.background": "bg:#88aaaa",
+                "scrollbar.button": "bg:#222222"
+                }
         }
+        self.style = Style.from_dict(self.config["style"])
         self.manager = manager
         if not args.command:
-            self.completer = ThreadedCompleter(path_completer.PathCompleter())
+            function_completer = NestedCompleter.from_nested_dict(dict.fromkeys(functions))
+            pth_completer = path_completer.PathCompleter()
+            merged_completers = merge_completers([function_completer, pth_completer])
+            self.completer = ThreadedCompleter(merged_completers)
         else:
             self.completer = None
         
         super().__init__(completer=self.completer,
-                         complete_while_typing=True,
+                         complete_while_typing=False,
                          auto_suggest=AutoSuggestFromHistory(),
                          search_ignore_case=True,
                          refresh_interval=0,
                          color_depth=ColorDepth.TRUE_COLOR,
-                         editing_mode=EditingMode.VI)
+                         editing_mode=EditingMode.VI,
+                         style=self.style)
 
     def resolver(self, userInput=None):
         global functions
@@ -186,15 +230,14 @@ class Shell(PromptSession):
         start(userInput)
 
     def run(self):
-        self.loadconfig()
-
         if args.command:
             self.resolver(" ".join(args.command))
             return
 
+        _prompt = HTML(self.config["prompt"].replace("USERDOMAIN", USERDOMAIN).replace("USER", USER).replace("PATH",os.getcwd()).replace("ROOT","#" if isadmin() == True else "$"))
         while True:
             try:
-                self.resolver(self.prompt(f"{os.getcwd()} $ "))
+                self.resolver(self.prompt(_prompt))
             except KeyboardInterrupt:
                 sys.exit(0)
 

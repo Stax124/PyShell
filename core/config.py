@@ -66,6 +66,7 @@ class Config():
         except:
             if self.verbose: self.print_timestamp(f"{c.bold}{name}{c.end} {c.warning}not found in config, trying to get from fallback{c.end}")
             self.config[name] = self.fallback[name]
+            self.save()
             return self.fallback[name]
 
     def __setitem__(self, key: str, val):
