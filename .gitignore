@@ -1,7 +1,8 @@
 /.vscode
 /env
 /plugins
-/test.py
-/test.txt
-/__pycache__
-core/__pycache__
+test.py
+test.txt
+test/
+*.cpython
+*.pyc

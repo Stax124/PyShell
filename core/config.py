@@ -17,33 +17,61 @@ class c:
 class Config():
     "Class for maintaining configuration information and files"
     def print_timestamp(self,*_str):
-        print(f"{c.bold}[{c.end}{c.warning}{datetime.datetime.now().strftime('%H:%M:%S')}{c.end}{c.bold}]{c.end}", *_str)
+        if self.colored:
+            print(f"{c.bold}[{c.end}{c.warning}{datetime.datetime.now().strftime('%H:%M:%S')}{c.end}{c.bold}]{c.end}", *_str)
+        else:
+            print(f"[{datetime.datetime.now().strftime('%H:%M:%S')}]", *_str)
 
     def load(self):
-        if self.verbose: self.print_timestamp(f"{c.bold}Loading config...{c.end}")
+        if self.verbose:
+            if self.colored:
+                self.print_timestamp(f"{c.bold}Loading config...{c.end}")
+            else:
+                self.print_timestamp(f"Loading config...")
         try:
             self.config = json.load(open(self.CONFIG))
             type(self.config.keys())
         except:
-            if self.verbose: self.print_timestamp(f"{c.warning}Config is unavailable or protected.{c.end} {c.bold}Loading fallback...{c.end}")
+            if self.verbose:
+                if self.colored:
+                    self.print_timestamp(f"{c.warning}Config is unavailable or protected.{c.end} {c.bold}Loading fallback...{c.end}")
+                else:
+                    self.print_timestamp(f"Config is unavailable or protected. Loading fallback...")
             self.config = self.fallback
-            if self.verbose: self.print_timestamp(f"{c.bold}Fallback loaded{c.end}")
+            if self.verbose:
+                if self.colored:
+                    self.print_timestamp(f"{c.bold}Fallback loaded{c.end}")
+                else:
+                    self.print_timestamp(f"Fallback loaded")
             try:
-                if self.verbose: self.print_timestamp(f"{c.bold}Creating new config file:{c.end} {c.green}{self.CONFIG}{c.end}")
+                if self.verbose:
+                    if self.colored:
+                        self.print_timestamp(f"{c.bold}Creating new config file:{c.end} {c.green}{self.CONFIG}{c.end}")
+                    else:
+                        self.print_timestamp(f"Creating new config file: {self.CONFIG}")
                 self.save()
             except Exception as e:
                 self.print_timestamp(traceback.format_exc())
-                if self.verbose: self.print_timestamp(f"{c.fail}Error writing config file, please check if you have permission to write in this location:{c.end} {c.bold}{self.CONFIG}{c.end}")
+                if self.verbose:
+                    if self.colored:
+                        self.print_timestamp(f"{c.fail}Error writing config file, please check if you have permission to write in this location:{c.end} {c.bold}{self.CONFIG}{c.end}")
+                    else:
+                        self.print_timestamp(f"Error writing config file, please check if you have permission to write in this location: {self.CONFIG}")
                 return
 
-        if self.verbose: self.print_timestamp(f"{c.bold}Config loaded{c.end}")
+        if self.verbose:
+            if self.colored:
+                self.print_timestamp(f"{c.bold}Config loaded{c.end}")
+            else:
+                self.print_timestamp(f"Config loaded")
 
-    def __init__(self, verbose=False):
+    def __init__(self, verbose=False, colored=True):
         if platform.system() == "Windows":
             self.CONFIG = os.environ["userprofile"] + r"\.voidshell" # Rename this
         else:
             self.CONFIG = os.path.expanduser("~")+r"/.voidshell" # Rename this ... alternative for linux or Unix based systems
         self.config = {}
+        self.colored = colored
         self.verbose = verbose
         self.fallback = {}
 
@@ -64,7 +92,11 @@ class Config():
         try:
             return self.config[name]
         except:
-            if self.verbose: self.print_timestamp(f"{c.bold}{name}{c.end} {c.warning}not found in config, trying to get from fallback{c.end}")
+            if self.verbose: 
+                if self.colored:
+                    self.print_timestamp(f"{c.bold}{name}{c.end} {c.warning}not found in config, trying to get from fallback{c.end}")
+                else:
+                    self.print_timestamp(f"{name} not found in config, trying to get from fallback")
             self.config[name] = self.fallback[name]
             self.save()
             return self.fallback[name]

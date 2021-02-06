@@ -91,13 +91,14 @@ def _cd(shell, *querry):
 
 functions["config"] = _config
 functions["cd"] = _cd
-functions["ls"] = _ls
+if platform.system() == "Windows":
+    functions["title"] = _title
+    functions["ls"] = _ls
 functions["platform"] = _platform
 functions["executable"] = _executable
 functions["whoami"] = _whoami
 functions["domain"] = _domain
 functions["pwn"] = _pwd
-functions["title"] = _title
 functions["read"] = _read
 functions["clear"] = _clear
 functions["cls"] = _clear

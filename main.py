@@ -58,7 +58,7 @@ except:                                 USERDOMAIN = "UNKNOWN"
 #endregion
 
 def run_command(command):
-    process = subprocess.Popen(shlex.split(command), stdout=subprocess.PIPE, shell=True, universal_newlines=True)
+    process = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True, universal_newlines=True)
     msg = ""
     while True:
         output = process.stdout.readline()
@@ -120,17 +120,17 @@ class Shell(PromptSession):
         return string        
 
     def __init__(self, verbose=False):
-        print("initializating Shell")
         try:
             if args.directory:
                 os.chdir(args.directory)
         except:
             pass
 
-        self.config = cfg.Config(verbose=verbose)
+        self.config = cfg.Config(verbose=verbose, colored=True)
         self.config.load()
         self.config.fallback = {
             "aliases": {},
+            "colored": True,
             "prompt": f"\n┏━━(<user>USER</user> at <user>USERDOMAIN</user>)━[<path>PATH</path>]\n┗━<pointer>ROOT</pointer> ",
             "style": {
                 # Default style
@@ -148,6 +148,7 @@ class Shell(PromptSession):
                 "scrollbar.button": "bg:#222222"
                 }
         }
+        self.config.colored = self.config["colored"]
         self.style = Style.from_dict(self.config["style"])
         self.manager = manager
         if not args.command:
@@ -170,6 +171,7 @@ class Shell(PromptSession):
     def resolver(self, userInput=None):
         global functions
         file = None
+        mode = "w"
 
         if userInput == "":
             return
@@ -189,7 +191,7 @@ class Shell(PromptSession):
                 except:
                     try:
                         output = eval(userInput)
-                        if type(output) not in [object, type(dir)]:
+                        if type(output) not in [object, function, type]:
                             print(output)
                         else:
                             raise Exception
@@ -198,7 +200,7 @@ class Shell(PromptSession):
 
             if result != None:
                 if file != None:
-                    with open(file, "w") as f:
+                    with open(file, mode) as f:
                         f.write(result)
                         f.close()
                 else:
@@ -207,15 +209,27 @@ class Shell(PromptSession):
         if len(userInput.split("&")) > 1:
             instances = userInput.split("&")
             for instance in instances:
-                if len(instance.split(">")) > 1:
-                    instance, file = instance.split(">")
+                if len(userInput.split(">")) == 2:
+                    userInput, file = userInput.split(">")
+                    mode = "w"
+                    file = str(file).strip()
+
+                if len(userInput.split(">>")) == 2:
+                    userInput, file = userInput.split(">>")
+                    mode = "a"
                     file = str(file).strip()
 
                 start(instance)
             return
 
-        if len(userInput.split(">")) > 1:
+        if len(userInput.split(">")) == 2:
             userInput, file = userInput.split(">")
+            mode = "w"
+            file = str(file).strip()
+
+        if len(userInput.split(">>")) == 2:
+            userInput, file = userInput.split(">>")
+            mode = "a"
             file = str(file).strip()
 
         start(userInput)
