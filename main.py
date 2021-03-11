@@ -1,4 +1,5 @@
-#region Imports
+# region Imports
+from functions import functions
 import shlex
 import os
 import sys
@@ -8,57 +9,80 @@ import math
 import traceback
 import ctypes
 import platform
-#endregion
+import re
+from io import StringIO
+# endregion
 
-#region Prompt-toolkit
+# region Prompt-toolkit
 from prompt_toolkit import PromptSession
 from prompt_toolkit.enums import EditingMode
 from prompt_toolkit.output.color_depth import ColorDepth
 from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
-from prompt_toolkit.completion import ThreadedCompleter, NestedCompleter, merge_completers
+from prompt_toolkit.completion import ThreadedCompleter, NestedCompleter, merge_completers, ExecutableCompleter
 from prompt_toolkit.styles import Style
 from prompt_toolkit import HTML
-#endregion
+# endregion
 
-#region Core
+# region Core
 from core import config as cfg
-from core import default, path_completer
-#endregion
+from core import default, path_completer, env_completer, promptvar
+# endregion
 
-#region Plugins
+# region Plugins
 from yapsy.PluginManager import PluginManager
 manager = PluginManager()
 manager.setPluginPlaces(["plugins"])
 manager.collectPlugins()
 for plugin in manager.getAllPlugins():
     plugin.plugin_object.main()
-#endregion
+# endregion
 
-#region Parser
+# region Parser
 parser = argparse.ArgumentParser()
 parser.add_argument("command", help="Execute following command", nargs="*")
 parser.add_argument("-d", "--directory", help="Start in specified directory")
+parser.add_argument("-v", "--verbose", action="store_true")
 
 if not sys.stdin.isatty():
     args = parser.parse_args(sys.stdin.readlines())
 else:
     args = parser.parse_args()
-#endregion
+# endregion
 
-#region CONSTATNTS
+# region CONSTATNTS
 try:
-    if platform.system() == "Windows":  USER = os.environ["USERNAME"]
-    else:                               USER = os.environ["USER"]
-except:                                 USER = "UNKNOWN"
+    if platform.system() == "Windows":
+        USER = os.environ["USERNAME"]
+    else:
+        USER = os.environ["USER"]
+except:
+    USER = "UNKNOWN"
 
 try:
-    if platform.system() == "Windows":  USERDOMAIN = os.environ["USERDOMAIN"]
-    else:                               USERDOMAIN = os.environ["NAME"]
-except:                                 USERDOMAIN = "UNKNOWN"
-#endregion
+    if platform.system() == "Windows":
+        DOMAIN = os.environ["USERDOMAIN"]
+    else:
+        DOMAIN = os.environ["NAME"]
+except:
+    DOMAIN = "UNKNOWN"
+# endregion
 
-def run_command(command):
-    process = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True, universal_newlines=True)
+pathext = os.environ["PATHEXT"].split(os.pathsep)
+
+
+def filter(name):
+    executable = False
+    for item in pathext:
+        if item.lower() in name:
+            return True
+
+    return False
+
+
+def run_command(command, stdin: str = ""):
+    process = subprocess.Popen(command, stdout=subprocess.PIPE,
+                               stdin=subprocess.PIPE, shell=True, universal_newlines=True, encoding="utf-8")
+    process.stdin.write(stdin)
     msg = ""
     while True:
         output = process.stdout.readline()
@@ -67,6 +91,7 @@ def run_command(command):
         if output:
             msg += output
     return msg
+
 
 def isadmin() -> bool:
     "Ask if run with elevated privileges"
@@ -77,6 +102,19 @@ def isadmin() -> bool:
         _is_admin = ctypes.windll.shell32.IsUserAnAdmin() != 0
 
     return _is_admin
+
+
+# region varinject
+promptvar.vars.update(
+    {
+        "DOMAIN": DOMAIN,
+        "USER": USER,
+        "PATH": os.getcwd,
+        "ROOT": "#" if isadmin == True else "$"
+    }
+)
+# endregion
+
 
 class Shell(PromptSession):
     def envirotize(self, string) -> str:
@@ -100,7 +138,8 @@ class Shell(PromptSession):
         if not "delalias" in string:
             for value in values:
                 if string.find(value) != -1:
-                    string = string.replace(value, self.config["aliases"].get(value))
+                    string = string.replace(
+                        value, self.config["aliases"].get(value))
 
         splitInput = string.split()
 
@@ -117,7 +156,7 @@ class Shell(PromptSession):
         if string != rebuild:
             string = rebuild
 
-        return string        
+        return string
 
     def __init__(self, verbose=False):
         try:
@@ -131,7 +170,7 @@ class Shell(PromptSession):
         self.config.fallback = {
             "aliases": {},
             "colored": True,
-            "prompt": f"\n┏━━(<user>USER</user> at <user>USERDOMAIN</user>)━[<path>PATH</path>]\n┗━<pointer>ROOT</pointer> ",
+            "prompt": f"\n┏━━(<user>USER</user> at <user> DOMAIN</user>)━[<path>PATH</path>]\n┗━<pointer>ROOT</pointer> ",
             "style": {
                 # Default style
                 "": "greenyellow",
@@ -146,19 +185,26 @@ class Shell(PromptSession):
                 "completion-menu.completion.current": "bg:#00aaaa #000000",
                 "scrollbar.background": "bg:#88aaaa",
                 "scrollbar.button": "bg:#222222"
-                }
+            }
         }
         self.config.colored = self.config["colored"]
         self.style = Style.from_dict(self.config["style"])
         self.manager = manager
+        self.file = None
+        self.mode = "w"
+        self.userInput = None
+
         if not args.command:
-            function_completer = NestedCompleter.from_nested_dict(dict.fromkeys(functions))
+            function_completer = NestedCompleter.from_nested_dict(
+                dict.fromkeys(functions))
             pth_completer = path_completer.PathCompleter()
-            merged_completers = merge_completers([function_completer, pth_completer])
+            environ_completer = env_completer.EnvCompleter(file_filter=filter)
+            merged_completers = merge_completers(
+                [function_completer, pth_completer, environ_completer])
             self.completer = ThreadedCompleter(merged_completers)
         else:
             self.completer = None
-        
+
         super().__init__(completer=self.completer,
                          complete_while_typing=False,
                          auto_suggest=AutoSuggestFromHistory(),
@@ -170,8 +216,20 @@ class Shell(PromptSession):
 
     def resolver(self, userInput=None):
         global functions
-        file = None
-        mode = "w"
+        self.userInput = userInput
+        self.file = None
+        self.mode = "w"
+
+        def pipe(uI):
+            if len(uI.split(">")) == 2:
+                self.userInput, _file = uI.split(">")
+                self.mode = "w"
+                self.file = str(_file).strip()
+
+            if len(uI.split(">>")) == 2:
+                self.userInput, _file = uI.split(">>")
+                self.mode = "a"
+                self.file = str(_file).strip()
 
         if userInput == "":
             return
@@ -183,24 +241,30 @@ class Shell(PromptSession):
             result = None
             splitInput = shlex.split(userInput)
 
+            old_stdout = sys.stdout
+            sys.stdout = mypipe = StringIO()
+
             try:
-                result = functions[splitInput[0]](self,*splitInput[1:])
+                functions[splitInput[0]](self, *splitInput[1:])
+                result = mypipe.getvalue()
+                sys.stdout = old_stdout
             except KeyError:
+                sys.stdout = old_stdout
                 try:
                     os.chdir(" ".join(splitInput))
                 except:
                     try:
                         output = eval(userInput)
-                        if type(output) not in [object, function, type]:
-                            print(output)
+                        if type(output) not in [object, type(dir)]:
+                            result = output
                         else:
                             raise Exception
                     except:
-                        result = run_command(" ".join(splitInput))
+                        result = run_command(userInput)
 
             if result != None:
-                if file != None:
-                    with open(file, mode) as f:
+                if self.file != None:
+                    with open(self.file, self.mode, encoding="utf-8") as f:
                         f.write(result)
                         f.close()
                 else:
@@ -209,30 +273,13 @@ class Shell(PromptSession):
         if len(userInput.split("&")) > 1:
             instances = userInput.split("&")
             for instance in instances:
-                if len(userInput.split(">")) == 2:
-                    userInput, file = userInput.split(">")
-                    mode = "w"
-                    file = str(file).strip()
-
-                if len(userInput.split(">>")) == 2:
-                    userInput, file = userInput.split(">>")
-                    mode = "a"
-                    file = str(file).strip()
-
+                pipe(instance)
                 start(instance)
             return
 
-        if len(userInput.split(">")) == 2:
-            userInput, file = userInput.split(">")
-            mode = "w"
-            file = str(file).strip()
+        pipe(self.userInput)
 
-        if len(userInput.split(">>")) == 2:
-            userInput, file = userInput.split(">>")
-            mode = "a"
-            file = str(file).strip()
-
-        start(userInput)
+        start(self.userInput)
 
     def run(self):
         if args.command:
@@ -241,13 +288,28 @@ class Shell(PromptSession):
 
         while True:
             try:
-                self.resolver(self.prompt(HTML(self.config["prompt"].replace("USERDOMAIN", USERDOMAIN).replace("USER", USER).replace("PATH",os.getcwd()).replace("ROOT","#" if isadmin() == True else "$"))))
+                iprompt = str(self.config["prompt"])
+                pattern = re.compile(r"[$][{]\w*[}]")
+                found = (re.findall(pattern, iprompt))
+                for item in found:
+                    ipatternt = re.compile(r"\w+")
+                    ifound = re.findall(ipatternt, item)[0]
+
+                    found = promptvar.vars[ifound]
+                    if type(found) == type(isadmin) or type(found) == type(os.getcwd):
+                        found = found()
+
+                    iprompt = iprompt.replace(item, found)
+
+                self.resolver(self.prompt(HTML(iprompt)))
             except KeyboardInterrupt:
                 sys.exit(0)
 
 
-if __name__ == "__main__":
-    from functions import functions
-
-    app = Shell(verbose=True)
+def run():
+    app = Shell(verbose=args.verbose)
     app.run()
+
+
+if __name__ == "__main__":
+    run()

@@ -4,6 +4,7 @@ import platform
 import os
 import json
 
+
 class c:
     header = '\033[95m'
     blue = '\033[94m'
@@ -14,11 +15,14 @@ class c:
     bold = '\033[1m'
     underline = '\033[4m'
 
+
 class Config():
     "Class for maintaining configuration information and files"
-    def print_timestamp(self,*_str):
+
+    def print_timestamp(self, *_str):
         if self.colored:
-            print(f"{c.bold}[{c.end}{c.warning}{datetime.datetime.now().strftime('%H:%M:%S')}{c.end}{c.bold}]{c.end}", *_str)
+            print(
+                f"{c.bold}[{c.end}{c.warning}{datetime.datetime.now().strftime('%H:%M:%S')}{c.end}{c.bold}]{c.end}", *_str)
         else:
             print(f"[{datetime.datetime.now().strftime('%H:%M:%S')}]", *_str)
 
@@ -29,14 +33,16 @@ class Config():
             else:
                 self.print_timestamp(f"Loading config...")
         try:
-            self.config = json.load(open(self.CONFIG))
+            self.config = json.load(open(self.CONFIG, encoding="utf-8"))
             type(self.config.keys())
         except:
             if self.verbose:
                 if self.colored:
-                    self.print_timestamp(f"{c.warning}Config is unavailable or protected.{c.end} {c.bold}Loading fallback...{c.end}")
+                    self.print_timestamp(
+                        f"{c.warning}Config is unavailable or protected.{c.end} {c.bold}Loading fallback...{c.end}")
                 else:
-                    self.print_timestamp(f"Config is unavailable or protected. Loading fallback...")
+                    self.print_timestamp(
+                        f"Config is unavailable or protected. Loading fallback...")
             self.config = self.fallback
             if self.verbose:
                 if self.colored:
@@ -46,17 +52,21 @@ class Config():
             try:
                 if self.verbose:
                     if self.colored:
-                        self.print_timestamp(f"{c.bold}Creating new config file:{c.end} {c.green}{self.CONFIG}{c.end}")
+                        self.print_timestamp(
+                            f"{c.bold}Creating new config file:{c.end} {c.green}{self.CONFIG}{c.end}")
                     else:
-                        self.print_timestamp(f"Creating new config file: {self.CONFIG}")
+                        self.print_timestamp(
+                            f"Creating new config file: {self.CONFIG}")
                 self.save()
             except Exception as e:
                 self.print_timestamp(traceback.format_exc())
                 if self.verbose:
                     if self.colored:
-                        self.print_timestamp(f"{c.fail}Error writing config file, please check if you have permission to write in this location:{c.end} {c.bold}{self.CONFIG}{c.end}")
+                        self.print_timestamp(
+                            f"{c.fail}Error writing config file, please check if you have permission to write in this location:{c.end} {c.bold}{self.CONFIG}{c.end}")
                     else:
-                        self.print_timestamp(f"Error writing config file, please check if you have permission to write in this location: {self.CONFIG}")
+                        self.print_timestamp(
+                            f"Error writing config file, please check if you have permission to write in this location: {self.CONFIG}")
                 return
 
         if self.verbose:
@@ -67,9 +77,11 @@ class Config():
 
     def __init__(self, verbose=False, colored=True):
         if platform.system() == "Windows":
-            self.CONFIG = os.environ["userprofile"] + r"\.voidshell" # Rename this
+            self.CONFIG = os.environ["userprofile"] + \
+                r"\.voidshell"  # Rename this
         else:
-            self.CONFIG = os.path.expanduser("~")+r"/.voidshell" # Rename this ... alternative for linux or Unix based systems
+            # Rename this ... alternative for linux or Unix based systems
+            self.CONFIG = os.path.expanduser("~")+r"/.voidshell"
         self.config = {}
         self.colored = colored
         self.verbose = verbose
@@ -77,8 +89,8 @@ class Config():
 
     def save(self):
         try:
-            with open(self.CONFIG, "w") as f:
-                json.dump(self.config, f, indent=4)
+            with open(self.CONFIG, "w", encoding="utf-8") as f:
+                json.dump(self.config, f, indent=4, ensure_ascii=False)
         except:
             self.print_timestamp(f"Unable to save data to {self.CONFIG}")
 
@@ -92,11 +104,13 @@ class Config():
         try:
             return self.config[name]
         except:
-            if self.verbose: 
+            if self.verbose:
                 if self.colored:
-                    self.print_timestamp(f"{c.bold}{name}{c.end} {c.warning}not found in config, trying to get from fallback{c.end}")
+                    self.print_timestamp(
+                        f"{c.bold}{name}{c.end} {c.warning}not found in config, trying to get from fallback{c.end}")
                 else:
-                    self.print_timestamp(f"{name} not found in config, trying to get from fallback")
+                    self.print_timestamp(
+                        f"{name} not found in config, trying to get from fallback")
             self.config[name] = self.fallback[name]
             self.save()
             return self.fallback[name]
@@ -106,6 +120,7 @@ class Config():
 
     def __delitem__(self, key: str):
         self.config.pop(key)
+
 
 if __name__ == "__main__":
     config = Config()
