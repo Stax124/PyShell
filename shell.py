@@ -1,12 +1,13 @@
 import platform
 import os
+import traceback
 import pip
 
 
 try:
     import main
 except Exception as e:
-    print(e)
+    print(traceback.format_exc())
 
     if platform.system() == "Windows":
         directory = ".\\plugins"

@@ -15,6 +15,7 @@ from io import StringIO
 
 # region Prompt-toolkit
 from prompt_toolkit import PromptSession
+from prompt_toolkit.history import FileHistory
 from prompt_toolkit.enums import EditingMode
 from prompt_toolkit.output.color_depth import ColorDepth
 from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
@@ -67,16 +68,18 @@ except:
     DOMAIN = "UNKNOWN"
 # endregion
 
-pathext = os.environ["PATHEXT"].split(os.pathsep)
+if platform.system() == "Windows":
+    pathext = os.environ["PATHEXT"].split(os.pathsep)
 
+    def filter(name):
+        for item in pathext:
+            if item.lower() in name:
+                return True
 
-def filter(name):
-    executable = False
-    for item in pathext:
-        if item.lower() in name:
-            return True
-
-    return False
+        return False
+else:
+    def filter(name):
+        return os.access(name, os.X_OK)
 
 
 def run_command(command, stdin: str = ""):
@@ -170,7 +173,7 @@ class Shell(PromptSession):
         self.config.fallback = {
             "aliases": {},
             "colored": True,
-            "prompt": f"\n┏━━(<user>USER</user> at <user> DOMAIN</user>)━[<path>PATH</path>]\n┗━<pointer>ROOT</pointer> ",
+            "prompt": "┏━━(<user>${USER}</user> at <user>${DOMAIN}</user>)━[<path>${PATH}</path>]\n┗━<pointer>${ROOT}</pointer> ",
             "style": {
                 # Default style
                 "": "greenyellow",
@@ -194,11 +197,21 @@ class Shell(PromptSession):
         self.mode = "w"
         self.userInput = None
 
+        if platform.system() == "Windows":
+            self.histfile = os.environ["userprofile"] + \
+                r"\.voidhistory"  # Rename this
+        else:
+            # Rename this ... alternative for linux or Unix based systems
+            self.histfile = os.path.expanduser("~")+r"/.voidhistory"
+
+        self.history = FileHistory(self.histfile)
+
         if not args.command:
             function_completer = NestedCompleter.from_nested_dict(
                 dict.fromkeys(functions))
             pth_completer = path_completer.PathCompleter()
-            environ_completer = env_completer.EnvCompleter(file_filter=filter)
+            environ_completer = env_completer.EnvCompleter(
+                file_filter=filter)
             merged_completers = merge_completers(
                 [function_completer, pth_completer, environ_completer])
             self.completer = ThreadedCompleter(merged_completers)
@@ -212,7 +225,8 @@ class Shell(PromptSession):
                          refresh_interval=0,
                          color_depth=ColorDepth.TRUE_COLOR,
                          editing_mode=EditingMode.VI,
-                         style=self.style)
+                         style=self.style,
+                         history=self.history)
 
     def resolver(self, userInput=None):
         global functions
@@ -239,7 +253,7 @@ class Shell(PromptSession):
 
         def start(userInput):
             result = None
-            splitInput = shlex.split(userInput)
+            splitInput = shlex.split(userInput, posix=False)
 
             old_stdout = sys.stdout
             sys.stdout = mypipe = StringIO()

@@ -57,11 +57,6 @@ def _domain(shell, *querry):
 def _pwd(shell, *querry):
     print(os.getcwd())
 
-
-def _title(shell, *querry):
-    subprocess.run(f'title {" ".join(querry)}', shell=True)
-
-
 def _read(shell, *querry):
     fparser = argparse.ArgumentParser(prog="read")
     fparser.add_argument("filename", help="Target filename")
@@ -108,8 +103,6 @@ def _cd(shell, *querry):
 
 functions["config"] = _config
 functions["cd"] = _cd
-if platform.system() == "Windows":
-    functions["title"] = _title
 functions["platform"] = _platform
 functions["executable"] = _executable
 functions["whoami"] = _whoami

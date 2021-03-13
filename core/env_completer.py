@@ -4,8 +4,6 @@ from typing import Callable, Iterable, List, Optional
 from prompt_toolkit.completion import CompleteEvent, Completer, Completion
 from prompt_toolkit.document import Document
 
-pathext = os.environ["PATHEXT"].split(os.pathsep)
-
 
 class EnvCompleter(Completer):
     """
@@ -28,7 +26,7 @@ class EnvCompleter(Completer):
         expanduser: bool = False,
     ) -> None:
 
-        self.paths = os.environ["PATH"].split(";")
+        self.paths = os.environ["PATH"].split(os.pathsep)
         self.only_directories = only_directories
         self.get_paths = get_paths or (lambda: self.paths)
         self.file_filter = file_filter or (lambda _: True)
