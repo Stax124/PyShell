@@ -82,6 +82,14 @@ else:
         return os.access(name, os.X_OK)
 
 
+def communicate(command, stdin: str = ""):
+    process = subprocess.Popen(command, stdout=subprocess.PIPE,
+                               stdin=subprocess.PIPE, shell=True, universal_newlines=True, encoding="utf-8")
+    process.stdin.write(stdin)
+    output = process.communicate()[0]
+    return output
+
+
 def run_command(command, stdin: str = ""):
     process = subprocess.Popen(command, stdout=subprocess.PIPE,
                                stdin=subprocess.PIPE, shell=True, universal_newlines=True, encoding="utf-8")
@@ -251,7 +259,7 @@ class Shell(PromptSession):
         userInput = self.envirotize(userInput)
         userInput = userInput.replace("\\", "\\\\")
 
-        def start(userInput):
+        def start(userInput, stdin: str = "", catch=False):
             result = None
             splitInput = shlex.split(userInput, posix=False)
 
@@ -274,7 +282,10 @@ class Shell(PromptSession):
                         else:
                             raise Exception
                     except:
-                        result = run_command(userInput)
+                        if not catch:
+                            result = run_command(userInput, stdin=stdin)
+                        else:
+                            result = communicate(userInput, stdin=stdin)
 
             if result != None:
                 if self.file != None:
@@ -282,13 +293,24 @@ class Shell(PromptSession):
                         f.write(result)
                         f.close()
                 else:
-                    print(result)
+                    if not catch: print(result)
+
+            return result
 
         if len(userInput.split("&")) > 1:
             instances = userInput.split("&")
             for instance in instances:
                 pipe(instance)
                 start(instance)
+            return
+
+        if len(userInput.split("|")) > 1:
+            instances = userInput.split("|")
+            _std = ""
+            for instance in instances:
+                pipe(instance)
+                _std = start(instance, _std, catch=True)
+            print(_std)
             return
 
         pipe(self.userInput)
@@ -316,8 +338,12 @@ class Shell(PromptSession):
                     iprompt = iprompt.replace(item, found)
 
                 self.resolver(self.prompt(HTML(iprompt)))
-            except KeyboardInterrupt:
+            except KeyboardInterrupt or EOFError:
+                pass
+            except SystemExit:
                 sys.exit(0)
+            except:
+                traceback.print_exc()
 
 
 def run():
