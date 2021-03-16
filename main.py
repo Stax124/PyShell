@@ -1,4 +1,6 @@
 # region Imports
+from prompt_toolkit.shortcuts.dialogs import yes_no_dialog
+from yapsy.PluginManager import PluginManager
 from functions import functions
 import shlex
 import os
@@ -33,6 +35,7 @@ from core import default, path_completer, env_completer, promptvar
 # region Git
 from pygit2 import Repository
 
+
 def getcurrentrepo():
     try:
         return Repository(r'.').head.shorthand
@@ -40,8 +43,8 @@ def getcurrentrepo():
         return ""
 # endregion
 
+
 # region Plugins
-from yapsy.PluginManager import PluginManager
 manager = PluginManager()
 manager.setPluginPlaces(["plugins"])
 manager.collectPlugins()
@@ -92,8 +95,10 @@ else:
     def filter(name):
         return os.access(name, os.X_OK)
 
+
 def timenow():
     return datetime.datetime.now().strftime(r"%H:%M:%S")
+
 
 def communicate(command, stdin: str = ""):
     process = subprocess.Popen(command, stdout=subprocess.PIPE,
@@ -292,7 +297,7 @@ class Shell(PromptSession):
                 except:
                     try:
                         output = eval(userInput)
-                        if type(output) not in [object, type(dir)]:
+                        if type(output) not in [object, type(dir), type(__class__)]:
                             result = output
                         else:
                             raise Exception
@@ -308,7 +313,8 @@ class Shell(PromptSession):
                         f.write(result)
                         f.close()
                 else:
-                    if not catch: print(result)
+                    if not catch:
+                        print(result)
 
             return result
 
@@ -328,9 +334,9 @@ class Shell(PromptSession):
             print(_std)
             return
 
-        pipe(self.userInput)
+        pipe(userInput)
 
-        start(self.userInput)
+        start(userInput)
 
     def run(self):
         if args.command:
@@ -358,7 +364,11 @@ class Shell(PromptSession):
             except SystemExit:
                 sys.exit(0)
             except:
-                traceback.print_exc()
+                result = yes_no_dialog(
+                    title="Error occured", text=traceback.format_exc(), yes_text="Continue", no_text="Exit").run()
+                if not result:
+                    sys.exit(0)
+                
 
 
 def run():
