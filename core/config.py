@@ -3,6 +3,7 @@ import traceback
 import platform
 import os
 import json
+from prompt_toolkit.shortcuts import yes_no_dialog
 
 
 class c:
@@ -50,14 +51,19 @@ class Config():
                 else:
                     self.print_timestamp(f"Fallback loaded")
             try:
-                if self.verbose:
-                    if self.colored:
-                        self.print_timestamp(
-                            f"{c.bold}Creating new config file:{c.end} {c.green}{self.CONFIG}{c.end}")
-                    else:
-                        self.print_timestamp(
-                            f"Creating new config file: {self.CONFIG}")
-                self.save()
+                result = yes_no_dialog(
+                    title="No config found !!!", text="Do you want to save new config ?"
+                ).run()
+
+                if result:
+                    if self.verbose:
+                        if self.colored:
+                            self.print_timestamp(
+                                f"{c.bold}Creating new config file:{c.end} {c.green}{self.CONFIG}{c.end}")
+                        else:
+                            self.print_timestamp(
+                                f"Creating new config file: {self.CONFIG}")
+                    self.save()
             except Exception as e:
                 self.print_timestamp(traceback.format_exc())
                 if self.verbose:

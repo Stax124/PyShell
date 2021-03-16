@@ -1,13 +1,14 @@
 import platform
 import os
-import traceback
 import pip
 
 
 try:
     import main
 except Exception as e:
-    print(traceback.format_exc())
+    cwd = os.getcwd()
+    dirname = os.path.dirname(os.path.abspath(__file__))
+    os.chdir(dirname)
 
     if platform.system() == "Windows":
         directory = ".\\plugins"
@@ -33,6 +34,8 @@ except Exception as e:
     if input("Proceed with installation ? ( y / n ) ").strip() == "y":
         requirements.extend(plugin_requirements)
         pip.main(["install"] + requirements)
+
+    os.chdir(cwd)
 
 finally:
     import main

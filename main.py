@@ -6,6 +6,7 @@ import sys
 import argparse
 import subprocess
 import math
+import datetime
 import traceback
 import ctypes
 import platform
@@ -27,6 +28,16 @@ from prompt_toolkit import HTML
 # region Core
 from core import config as cfg
 from core import default, path_completer, env_completer, promptvar
+# endregion
+
+# region Git
+from pygit2 import Repository
+
+def getcurrentrepo():
+    try:
+        return Repository(r'.').head.shorthand
+    except:
+        return ""
 # endregion
 
 # region Plugins
@@ -81,6 +92,8 @@ else:
     def filter(name):
         return os.access(name, os.X_OK)
 
+def timenow():
+    return datetime.datetime.now().strftime(r"%H:%M:%S")
 
 def communicate(command, stdin: str = ""):
     process = subprocess.Popen(command, stdout=subprocess.PIPE,
@@ -94,14 +107,13 @@ def run_command(command, stdin: str = ""):
     process = subprocess.Popen(command, stdout=subprocess.PIPE,
                                stdin=subprocess.PIPE, shell=True, universal_newlines=True, encoding="utf-8")
     process.stdin.write(stdin)
-    msg = ""
     while True:
         output = process.stdout.readline()
         if output == "" and process.poll() is not None:
+            print()
             break
         if output:
-            msg += output
-    return msg
+            print(output, end="")
 
 
 def isadmin() -> bool:
@@ -121,7 +133,9 @@ promptvar.vars.update(
         "DOMAIN": DOMAIN,
         "USER": USER,
         "PATH": os.getcwd,
-        "ROOT": "#" if isadmin == True else "$"
+        "ROOT": "#" if isadmin == True else "$",
+        "REPO": getcurrentrepo,
+        "TIME": timenow
     }
 )
 # endregion
@@ -181,12 +195,13 @@ class Shell(PromptSession):
         self.config.fallback = {
             "aliases": {},
             "colored": True,
-            "prompt": "┏━━(<user>${USER}</user> at <user>${DOMAIN}</user>)━[<path>${PATH}</path>]\n┗━<pointer>${ROOT}</pointer> ",
+            "prompt": "<base>┏━━(</base><user>${USER}</user> <base>at</base> <user>${DOMAIN}</user><base>)━[</base><path>${PATH}</path><base>]━[</base><style fg='${green-yellow}'>${REPO}</style><base>]━[</base><style fg='yellow'>${TIME}</style><base>]\n┗━</base><pointer>${ROOT}</pointer> ",
             "style": {
                 # Default style
-                "": "greenyellow",
+                "": "",
 
                 # Specific style
+                "base": "#1a8cff",
                 "pointer": "#ff4500",
                 "path": "aqua",
                 "user": "#ff4500",
@@ -282,8 +297,8 @@ class Shell(PromptSession):
                         else:
                             raise Exception
                     except:
-                        if not catch:
-                            result = run_command(userInput, stdin=stdin)
+                        if not catch or self.file != None:
+                            run_command(userInput, stdin=stdin)
                         else:
                             result = communicate(userInput, stdin=stdin)
 
@@ -325,10 +340,10 @@ class Shell(PromptSession):
         while True:
             try:
                 iprompt = str(self.config["prompt"])
-                pattern = re.compile(r"[$][{]\w*[}]")
+                pattern = re.compile(r"\$\{[^}]*\}")
                 found = (re.findall(pattern, iprompt))
                 for item in found:
-                    ipatternt = re.compile(r"\w+")
+                    ipatternt = re.compile(r"[^$^{].+[^}]")
                     ifound = re.findall(ipatternt, item)[0]
 
                     found = promptvar.vars[ifound]
