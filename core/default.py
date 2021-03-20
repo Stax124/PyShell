@@ -7,22 +7,28 @@ import argparse
 import threading
 import subprocess
 
+
 def _config(shell, *querry):
     if querry == ():
         print(json.dumps(shell.config.config, indent=4))
 
+
 def _ls(shell, *querry):
-    return subprocess.check_output("dir", shell=True, universal_newlines=True)
+    print(subprocess.check_output("dir", shell=True, universal_newlines=True))
+
 
 def _plugins(shell, *querry):
     for plugin in shell.manager.getAllPlugins():
         print(plugin.name)
 
+
 def _platform(shell, *querry):
     print(platform.system())
 
+
 def _executable(shell, *querry):
     print(sys.executable)
+
 
 def _whoami(shell, *querry):
     try:
@@ -35,6 +41,7 @@ def _whoami(shell, *querry):
 
     print(USER)
 
+
 def _domain(shell, *querry):
     try:
         if platform.system() == "Windows":
@@ -46,16 +53,15 @@ def _domain(shell, *querry):
 
     print(USERDOMAIN)
 
+
 def _pwd(shell, *querry):
     print(os.getcwd())
-
-def _title(shell, *querry):
-    subprocess.run(f'title {" ".join(querry)}', shell=True)
 
 def _read(shell, *querry):
     fparser = argparse.ArgumentParser(prog="read")
     fparser.add_argument("filename", help="Target filename")
-    fparser.add_argument("-n", dest="number",help="Number of lines", default=-1, type=int)
+    fparser.add_argument("-n", dest="number",
+                         help="Number of lines", default=-1, type=int)
     try:
         fargs = fparser.parse_args(querry)
     except SystemExit:
@@ -70,35 +76,38 @@ def _read(shell, *querry):
             print(content)
     file.close()
 
+
 def _clear(shell, *querry):
     if platform.system() == "Windows":
         subprocess.run("cls", shell=True)
     else:
         subprocess.run("clear", shell=True)
 
+
 def _theads(shell, *querry):
     print(
         f"Active threads: {threading.activeCount()}\n")
     for t in threading.enumerate():
-        print("{:<30} {:<30}".format(t.name, "active" if t.is_alive() else "stopped"))
+        print("{:<30} {:<30}".format(
+            t.name, "active" if t.is_alive() else "stopped"))
     return
+
 
 def _exit(shell, *querry):
     sys.exit(0)
 
+
 def _cd(shell, *querry):
     os.chdir(" ".join(querry))
 
+
 functions["config"] = _config
 functions["cd"] = _cd
-if platform.system() == "Windows":
-    functions["title"] = _title
-    functions["ls"] = _ls
 functions["platform"] = _platform
 functions["executable"] = _executable
 functions["whoami"] = _whoami
 functions["domain"] = _domain
-functions["pwn"] = _pwd
+functions["pwd"] = _pwd
 functions["read"] = _read
 functions["clear"] = _clear
 functions["cls"] = _clear
