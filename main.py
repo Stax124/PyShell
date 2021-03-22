@@ -103,6 +103,7 @@ def timenow():
 
 
 def communicate(command: str, stdin: str = ""):
+
     process = subprocess.Popen(command, stdout=subprocess.PIPE,
                                stdin=subprocess.PIPE, shell=True, universal_newlines=True, encoding="utf-8")
     process.stdin.write(stdin)
@@ -339,6 +340,7 @@ class Shell(PromptSession):
 
         if len(self.userInput.split("|")) > 1:
             instances = self.userInput.split("|")
+            
             _std = ""
             for instance in instances:
                 pipe(instance)

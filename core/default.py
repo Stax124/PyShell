@@ -104,6 +104,7 @@ def _cd(shell, *querry):
         print("Path does not exist")
 
 
+
 functions["config"] = _config
 functions["cd"] = _cd
 functions["platform"] = _platform

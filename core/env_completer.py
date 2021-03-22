@@ -131,5 +131,6 @@ class EnvCompleter(Completer):
                 if completion not in found:
                     found.append(completion)
                     yield Completion(completion, 0, display=filename)
+
         except OSError:
             pass
