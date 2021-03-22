@@ -98,7 +98,10 @@ def _exit(shell, *querry):
 
 
 def _cd(shell, *querry):
-    os.chdir(" ".join(querry))
+    try:
+        os.chdir(" ".join(querry))
+    except OSError:
+        print("Path does not exist")
 
 
 functions["config"] = _config

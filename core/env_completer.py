@@ -82,6 +82,8 @@ class EnvCompleter(Completer):
             return
 
         try:
+            found = []
+
             # Do tilde expansion.
             if self.expanduser:
                 text = os.path.expanduser(text)
@@ -126,6 +128,8 @@ class EnvCompleter(Completer):
                 if not self.file_filter(full_name):
                     continue
 
-                yield Completion(completion, 0, display=filename)
+                if completion not in found:
+                    found.append(completion)
+                    yield Completion(completion, 0, display=filename)
         except OSError:
             pass
