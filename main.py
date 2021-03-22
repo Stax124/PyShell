@@ -45,8 +45,10 @@ def getcurrentrepo():
 
 
 # region Plugins
+path = os.path.dirname(__file__)
+
 manager = PluginManager()
-manager.setPluginPlaces(["plugins"])
+manager.setPluginPlaces([path])
 manager.collectPlugins()
 for plugin in manager.getAllPlugins():
     plugin.plugin_object.main()
@@ -100,7 +102,8 @@ def timenow():
     return datetime.datetime.now().strftime(r"%H:%M:%S")
 
 
-def communicate(command, stdin: str = ""):
+def communicate(command: str, stdin: str = ""):
+
     process = subprocess.Popen(command, stdout=subprocess.PIPE,
                                stdin=subprocess.PIPE, shell=True, universal_newlines=True, encoding="utf-8")
     process.stdin.write(stdin)
@@ -108,17 +111,11 @@ def communicate(command, stdin: str = ""):
     return output
 
 
-def run_command(command, stdin: str = ""):
-    process = subprocess.Popen(command, stdout=subprocess.PIPE,
-                               stdin=subprocess.PIPE, shell=True, universal_newlines=True, encoding="utf-8")
-    process.stdin.write(stdin)
-    while True:
-        output = process.stdout.readline()
-        if output == "" and process.poll() is not None:
-            print()
-            break
-        if output:
-            print(output, end="")
+def run_command(command: str):
+    try:
+        os.system(command)
+    except:
+        print("Not found")
 
 
 def isadmin() -> bool:
@@ -149,7 +146,6 @@ promptvar.vars.update(
 class Shell(PromptSession):
     def envirotize(self, string) -> str:
         "Applies Environment variables"
-        import re
 
         def expandvars(string, default=None, skip_escaped=False):
             """Expand environment variables of form $var and ${var}.
@@ -216,13 +212,20 @@ class Shell(PromptSession):
                 "completion-menu.completion.current": "bg:#00aaaa #000000",
                 "scrollbar.background": "bg:#88aaaa",
                 "scrollbar.button": "bg:#222222"
+            },
+            "dialog_style": {
+                "dialog": "bg:#88ff88",
+                "dialog frame-label": "bg:#ffffff #000000",
+                "dialog.body": "bg:#000000 #00ff00",
+                "dialog shadow": "bg:#00aa00",
             }
         }
         self.config.colored = self.config["colored"]
         self.style = Style.from_dict(self.config["style"])
+        self.dialog_style = Style.from_dict(self.config["dialog_style"])
         self.manager = manager
         self.file = None
-        self.mode = "w"
+        self.mode = None
         self.userInput = None
 
         if platform.system() == "Windows":
@@ -237,7 +240,7 @@ class Shell(PromptSession):
         if not args.command:
             function_completer = NestedCompleter.from_nested_dict(
                 dict.fromkeys(functions))
-            pth_completer = path_completer.PathCompleter()
+            pth_completer = path_completer.PathCompleter(expanduser=True)
             environ_completer = env_completer.EnvCompleter(
                 file_filter=filter)
             merged_completers = merge_completers(
@@ -260,40 +263,49 @@ class Shell(PromptSession):
         global functions
         self.userInput = userInput
         self.file = None
-        self.mode = "w"
+        self.mode = None
+
+        if self.userInput == "":
+            return
 
         def pipe(uI):
             if len(uI.split(">")) == 2:
                 self.userInput, _file = uI.split(">")
                 self.mode = "w"
                 self.file = str(_file).strip()
+                return True
 
             if len(uI.split(">>")) == 2:
                 self.userInput, _file = uI.split(">>")
                 self.mode = "a"
                 self.file = str(_file).strip()
+                return True
 
-        if userInput == "":
-            return
+            return False
 
-        userInput = self.envirotize(userInput)
-        userInput = userInput.replace("\\", "\\\\")
+        self.userInput = self.envirotize(userInput)
+        self.userInput = self.userInput.replace("\\", "\\\\")
 
         def start(userInput, stdin: str = "", catch=False):
             result = None
             splitInput = shlex.split(userInput, posix=False)
 
-            old_stdout = sys.stdout
-            sys.stdout = mypipe = StringIO()
+            if catch == True:
+                old_stdout = sys.stdout
+                sys.stdout = mypipe = StringIO()
 
             try:
                 functions[splitInput[0]](self, *splitInput[1:])
-                result = mypipe.getvalue()
-                sys.stdout = old_stdout
+                if catch == True:
+                    result = mypipe.getvalue()
+                    sys.stdout = old_stdout
+            except IndexError:
+                pass
             except KeyError:
-                sys.stdout = old_stdout
+                if catch == True:
+                    sys.stdout = old_stdout
                 try:
-                    os.chdir(" ".join(splitInput))
+                    os.chdir(os.path.expanduser(" ".join(splitInput)))
                 except:
                     try:
                         output = eval(userInput)
@@ -302,8 +314,9 @@ class Shell(PromptSession):
                         else:
                             raise Exception
                     except:
-                        if not catch or self.file != None:
-                            run_command(userInput, stdin=stdin)
+                        if not catch:
+                            run_command(userInput)
+                            result = None
                         else:
                             result = communicate(userInput, stdin=stdin)
 
@@ -318,15 +331,16 @@ class Shell(PromptSession):
 
             return result
 
-        if len(userInput.split("&")) > 1:
-            instances = userInput.split("&")
+        if len(self.userInput.split("&")) > 1:
+            instances = self.userInput.split("&")
             for instance in instances:
-                pipe(instance)
-                start(instance)
+                catch = pipe(instance)
+                start(instance, catch=catch)
             return
 
-        if len(userInput.split("|")) > 1:
-            instances = userInput.split("|")
+        if len(self.userInput.split("|")) > 1:
+            instances = self.userInput.split("|")
+            
             _std = ""
             for instance in instances:
                 pipe(instance)
@@ -334,9 +348,9 @@ class Shell(PromptSession):
             print(_std)
             return
 
-        pipe(userInput)
+        catch = pipe(self.userInput)
 
-        start(userInput)
+        start(self.userInput, catch=catch)
 
     def run(self):
         if args.command:
@@ -362,13 +376,12 @@ class Shell(PromptSession):
             except KeyboardInterrupt or EOFError:
                 pass
             except SystemExit:
-                sys.exit(0)
+                exit(0)
             except:
                 result = yes_no_dialog(
-                    title="Error occured", text=traceback.format_exc(), yes_text="Continue", no_text="Exit").run()
+                    title="Error occured", text=traceback.format_exc(chain=False), yes_text="Continue", no_text="Exit", style=self.dialog_style).run()
                 if not result:
                     sys.exit(0)
-                
 
 
 def run():
