@@ -5,6 +5,7 @@ from functions import functions
 import shlex
 import os
 import sys
+import getpass
 import argparse
 import subprocess
 import math
@@ -68,18 +69,12 @@ else:
 
 # region CONSTATNTS
 try:
-    if platform.system() == "Windows":
-        USER = os.environ["USERNAME"]
-    else:
-        USER = os.environ["USER"]
+    USER = getpass.getuser()
 except:
     USER = "UNKNOWN"
 
 try:
-    if platform.system() == "Windows":
-        DOMAIN = os.environ["USERDOMAIN"]
-    else:
-        DOMAIN = os.environ["NAME"]
+    DOMAIN = platform.node()
 except:
     DOMAIN = "UNKNOWN"
 # endregion
@@ -108,7 +103,7 @@ def communicate(command: str, stdin: str = ""):
                                stdin=subprocess.PIPE, shell=True, universal_newlines=True, encoding="utf-8")
     process.stdin.write(stdin)
     output = process.communicate()[0]
-    return output
+    return (output, process.returncode)
 
 
 def run_command(command: str):
@@ -137,7 +132,16 @@ promptvar.vars.update(
         "PATH": os.getcwd,
         "ROOT": "#" if isadmin == True else "$",
         "REPO": getcurrentrepo,
-        "TIME": timenow
+        "TIME": timenow,
+        "SYSTEM": platform.system,
+        "WIN32EDITION": platform.win32_edition,
+        "WIN32VER": platform.win32_ver,
+        "MACOSVER": platform.mac_ver,
+        "MACHINETYPE": platform.machine,
+        "PLATFORM": platform.platform,
+        "CPUCOUNT": os.cpu_count,
+        "LOGIN": os.getlogin,
+        "PID": os.getpid
     }
 )
 # endregion
@@ -268,7 +272,7 @@ class Shell(PromptSession):
         if self.userInput == "":
             return
 
-        def pipe(uI):
+        def filepipe(uI):
             if len(uI.split(">")) == 2:
                 self.userInput, _file = uI.split(">")
                 self.mode = "w"
@@ -318,7 +322,8 @@ class Shell(PromptSession):
                             run_command(userInput)
                             result = None
                         else:
-                            result = communicate(userInput, stdin=stdin)
+                            result, return_code = communicate(
+                                userInput, stdin=stdin)
 
             if result != None:
                 if self.file != None:
@@ -334,21 +339,21 @@ class Shell(PromptSession):
         if len(self.userInput.split("&")) > 1:
             instances = self.userInput.split("&")
             for instance in instances:
-                catch = pipe(instance)
+                catch = filepipe(instance)
                 start(instance, catch=catch)
             return
 
         if len(self.userInput.split("|")) > 1:
             instances = self.userInput.split("|")
-            
+
             _std = ""
             for instance in instances:
-                pipe(instance)
+                filepipe(instance)
                 _std = start(instance, _std, catch=True)
             print(_std)
             return
 
-        catch = pipe(self.userInput)
+        catch = filepipe(self.userInput)
 
         start(self.userInput, catch=catch)
 
