@@ -108,7 +108,7 @@ def communicate(command: str, stdin: str = ""):
 
 def run_command(command: str):
     try:
-        os.system(command)
+        return os.system(command)
     except:
         print("Not found")
 
@@ -127,6 +127,7 @@ def isadmin() -> bool:
 # region varinject
 promptvar.vars.update(
     {
+        "RETURNCODE": 0,
         "DOMAIN": DOMAIN,
         "USER": USER,
         "PATH": os.getcwd,
@@ -263,6 +264,9 @@ class Shell(PromptSession):
                          style=self.style,
                          history=self.history)
 
+    def update_return_code(self, return_code: int):
+        promptvar.vars.update({"RETURNCODE": return_code})
+
     def resolver(self, userInput=None):
         global functions
         self.userInput = userInput
@@ -299,7 +303,8 @@ class Shell(PromptSession):
                 sys.stdout = mypipe = StringIO()
 
             try:
-                functions[splitInput[0]](self, *splitInput[1:])
+                return_code = 0 if functions[splitInput[0]](
+                    self, *splitInput[1:]) == None else 1
                 if catch == True:
                     result = mypipe.getvalue()
                     sys.stdout = old_stdout
@@ -309,17 +314,20 @@ class Shell(PromptSession):
                 if catch == True:
                     sys.stdout = old_stdout
                 try:
-                    os.chdir(os.path.expanduser(" ".join(splitInput)))
+                    return_code = 0 if functions["cd"](
+                        self, *splitInput[1:], command=False) == None else 1
                 except:
                     try:
                         output = eval(userInput)
                         if type(output) not in [object, type(dir), type(__class__)]:
                             result = output
+                            return_code = 0
                         else:
+                            return_code = 1
                             raise Exception
                     except:
                         if not catch:
-                            run_command(userInput)
+                            return_code = run_command(userInput)
                             result = None
                         else:
                             result, return_code = communicate(
@@ -334,13 +342,42 @@ class Shell(PromptSession):
                     if not catch:
                         print(result)
 
-            return result
+            return result, return_code
 
-        if len(self.userInput.split("&")) > 1:
-            instances = self.userInput.split("&")
+        if len(self.userInput.split(";")) > 1:
+            instances = self.userInput.split(";")
+            ret = 0
             for instance in instances:
                 catch = filepipe(instance)
-                start(instance, catch=catch)
+                _, ret = start(instance, catch=catch)
+
+            self.update_return_code(ret)
+            return
+
+        if len(self.userInput.split("&&")) > 1:
+            instances = self.userInput.split("&&")
+            ret = 0
+            for instance in instances:
+                if ret == 0:
+                    catch = filepipe(instance)
+                    _, ret = start(instance, catch=catch)
+                else:
+                    self.update_return_code(ret)
+                    return
+            self.update_return_code(ret)
+            return
+
+        if len(self.userInput.split("||")) > 1:
+            instances = self.userInput.split("||")
+            ret = 1
+            for instance in instances:
+                if ret != 0:
+                    catch = filepipe(instance)
+                    _, ret = start(instance, catch=catch)
+                else:
+                    self.update_return_code(ret)
+                    return
+            self.update_return_code(ret)
             return
 
         if len(self.userInput.split("|")) > 1:
@@ -349,13 +386,15 @@ class Shell(PromptSession):
             _std = ""
             for instance in instances:
                 filepipe(instance)
-                _std = start(instance, _std, catch=True)
+                _std, return_code = start(instance, _std, catch=True)
             print(_std)
+            self.update_return_code(return_code)
             return
 
         catch = filepipe(self.userInput)
 
-        start(self.userInput, catch=catch)
+        _, return_code = start(self.userInput, catch=catch)
+        self.update_return_code(return_code)
 
     def run(self):
         if args.command:
@@ -375,7 +414,7 @@ class Shell(PromptSession):
                     if type(found) == type(isadmin) or type(found) == type(os.getcwd):
                         found = found()
 
-                    iprompt = iprompt.replace(item, found)
+                    iprompt = iprompt.replace(item, str(found))
 
                 self.resolver(self.prompt(HTML(iprompt)))
             except KeyboardInterrupt or EOFError:

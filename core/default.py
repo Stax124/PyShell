@@ -57,6 +57,7 @@ def _domain(shell, *querry):
 def _pwd(shell, *querry):
     print(os.getcwd())
 
+
 def _read(shell, *querry):
     fparser = argparse.ArgumentParser(prog="read")
     fparser.add_argument("filename", help="Target filename")
@@ -97,12 +98,14 @@ def _exit(shell, *querry):
     sys.exit(0)
 
 
-def _cd(shell, *querry):
+def _cd(shell, *querry, command=True):
     try:
-        os.chdir(" ".join(querry))
+        os.chdir(os.path.expanduser(" ".join(querry)))
     except OSError:
-        print("Path does not exist")
-
+        if command:
+            print("Path does not exist")
+        else:
+            raise OSError
 
 
 functions["config"] = _config
