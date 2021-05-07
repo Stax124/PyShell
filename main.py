@@ -1,4 +1,5 @@
 # region Imports
+from pygit2 import Repository
 from prompt_toolkit.shortcuts.dialogs import yes_no_dialog
 from yapsy.PluginManager import PluginManager
 from functions import functions
@@ -31,17 +32,6 @@ from prompt_toolkit import HTML
 # region Core
 from core import config as cfg
 from core import default, path_completer, env_completer, promptvar
-# endregion
-
-# region Git
-from pygit2 import Repository
-
-
-def getcurrentrepo():
-    try:
-        return Repository(r'.').head.shorthand
-    except:
-        return ""
 # endregion
 
 
@@ -93,11 +83,43 @@ else:
         return os.access(name, os.X_OK)
 
 
+# region Git
+
+
+def getcurrentrepo():
+    """Get branch of git repository in current folder
+
+    Returns:
+        str: branch of git repository
+    """
+
+    try:
+        return Repository(r'.').head.shorthand
+    except:
+        return ""
+# endregion
+
+
 def timenow():
+    """Get current time
+
+    Returns:
+        str: `Hour:Minute:Second`
+    """
+
     return datetime.datetime.now().strftime(r"%H:%M:%S")
 
 
 def communicate(command: str, stdin: str = ""):
+    """Execute command in shell and return stdout with returncode
+
+    Args:
+        command (str): Command for shell
+        stdin (str, optional): Set stdin for this command. Defaults to "".
+
+    Returns:
+        tuple: (stdout, return_code)
+    """
 
     process = subprocess.Popen(command, stdout=subprocess.PIPE,
                                stdin=subprocess.PIPE, shell=True, universal_newlines=True, encoding="utf-8")
@@ -107,6 +129,15 @@ def communicate(command: str, stdin: str = ""):
 
 
 def run_command(command: str):
+    """Run command, if it fails, print 'Not found'
+
+    Args:
+        command (str): Command for shell
+
+    Returns:
+        int | None: return_code or None
+    """
+
     try:
         return os.system(command)
     except:
@@ -114,7 +145,12 @@ def run_command(command: str):
 
 
 def isadmin() -> bool:
-    "Ask if run with elevated privileges"
+    """Ask if run with elevated privileges
+
+    Returns:
+        bool: Has admin privelage
+    """
+
     try:
         _is_admin = os.getuid() == 0
 
@@ -149,8 +185,17 @@ promptvar.vars.update(
 
 
 class Shell(PromptSession):
-    def envirotize(self, string) -> str:
-        "Applies Environment variables"
+    "Main class for displaying and manipulating shell or its configuration"
+
+    def envirotize(self, string: str) -> str:
+        """Applies environment variables and aliases
+
+        Args:
+            string (str): Input string
+
+        Returns:
+            str: Evaluated string
+        """
 
         def expandvars(string, default=None, skip_escaped=False):
             """Expand environment variables of form $var and ${var}.
@@ -268,6 +313,15 @@ class Shell(PromptSession):
         promptvar.vars.update({"RETURNCODE": return_code})
 
     def resolver(self, userInput=None):
+        """Process string as command
+
+        Args:
+            userInput (str, optional): String, that will be evaluated. Defaults to None.
+
+        Returns:
+            None
+        """
+
         global functions
         self.userInput = userInput
         self.file = None
@@ -397,6 +451,8 @@ class Shell(PromptSession):
         self.update_return_code(return_code)
 
     def run(self):
+        """Start infinite shell loop or execute passed command"""
+
         if args.command:
             self.resolver(" ".join(args.command))
             return
