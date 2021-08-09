@@ -1,0 +1,8 @@
+[Core]
+Name = Networking
+Module = networking
+
+[Documentation]
+Author = Tomáš Novák
+Version = 0.1
+Description = Everything for networking

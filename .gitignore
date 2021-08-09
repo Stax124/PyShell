@@ -1,6 +1,5 @@
 /.vscode
 /env
-/plugins
 test.py
 test.txt
 test/

@@ -1,0 +1,8 @@
+[Core]
+Name = SQLite
+Module = sqlite
+
+[Documentation]
+Author = Tomáš Novák
+Version = 0.1
+Description = SQLite database connector
