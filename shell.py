@@ -23,7 +23,7 @@ except Exception as e:
     plugin_requirements = []
     for file in listOfFiles:
         for _requirement in open(file, "r", encoding="utf-16").readlines():
-            plugin_requirements.append(_requirement)
+            plugin_requirements.append(_requirement.replace("\n", ""))
 
     requirements = [i.replace("\n", "") for i in open(
         "requirements.txt", "r", encoding="utf-16").readlines()]

@@ -1,8 +1,15 @@
 /.vscode
 /env
-/plugins
 test.py
 test.txt
 test/
 *.cpython
 *.pyc
+Shell
+*.spec
+dist/
+build/
+utils/
+pyu-data
+.pyupdater
+client_config.py

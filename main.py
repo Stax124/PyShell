@@ -1,10 +1,12 @@
 # region Imports
+from pygit2 import Repository
 from prompt_toolkit.shortcuts.dialogs import yes_no_dialog
 from yapsy.PluginManager import PluginManager
 from functions import functions
 import shlex
 import os
 import sys
+import getpass
 import argparse
 import subprocess
 import math
@@ -32,17 +34,6 @@ from core import config as cfg
 from core import default, path_completer, env_completer, promptvar
 # endregion
 
-# region Git
-from pygit2 import Repository
-
-
-def getcurrentrepo():
-    try:
-        return Repository(r'.').head.shorthand
-    except:
-        return ""
-# endregion
-
 
 # region Plugins
 path = os.path.dirname(__file__)
@@ -68,18 +59,12 @@ else:
 
 # region CONSTATNTS
 try:
-    if platform.system() == "Windows":
-        USER = os.environ["USERNAME"]
-    else:
-        USER = os.environ["USER"]
+    USER = getpass.getuser()
 except:
     USER = "UNKNOWN"
 
 try:
-    if platform.system() == "Windows":
-        DOMAIN = os.environ["USERDOMAIN"]
-    else:
-        DOMAIN = os.environ["NAME"]
+    DOMAIN = platform.node()
 except:
     DOMAIN = "UNKNOWN"
 # endregion
@@ -98,28 +83,74 @@ else:
         return os.access(name, os.X_OK)
 
 
+# region Git
+
+
+def getcurrentrepo():
+    """Get branch of git repository in current folder
+
+    Returns:
+        str: branch of git repository
+    """
+
+    try:
+        return Repository(r'.').head.shorthand
+    except:
+        return ""
+# endregion
+
+
 def timenow():
+    """Get current time
+
+    Returns:
+        str: `Hour:Minute:Second`
+    """
+
     return datetime.datetime.now().strftime(r"%H:%M:%S")
 
 
 def communicate(command: str, stdin: str = ""):
+    """Execute command in shell and return stdout with returncode
+
+    Args:
+        command (str): Command for shell
+        stdin (str, optional): Set stdin for this command. Defaults to "".
+
+    Returns:
+        tuple: (stdout, return_code)
+    """
 
     process = subprocess.Popen(command, stdout=subprocess.PIPE,
                                stdin=subprocess.PIPE, shell=True, universal_newlines=True, encoding="utf-8")
     process.stdin.write(stdin)
     output = process.communicate()[0]
-    return output
+    return (output, process.returncode)
 
 
 def run_command(command: str):
+    """Run command, if it fails, print 'Not found'
+
+    Args:
+        command (str): Command for shell
+
+    Returns:
+        int | None: return_code or None
+    """
+
     try:
-        os.system(command)
+        return os.system(command)
+
     except:
         print("Not found")
 
-
 def isadmin() -> bool:
-    "Ask if run with elevated privileges"
+    """Ask if run with elevated privileges
+
+    Returns:
+        bool: Has admin privelage
+    """
+
     try:
         _is_admin = os.getuid() == 0
 
@@ -132,20 +163,37 @@ def isadmin() -> bool:
 # region varinject
 promptvar.vars.update(
     {
+        "RETURNCODE": 0,
         "DOMAIN": DOMAIN,
         "USER": USER,
         "PATH": os.getcwd,
         "ROOT": "#" if isadmin == True else "$",
         "REPO": getcurrentrepo,
-        "TIME": timenow
+        "TIME": timenow,
+        "SYSTEM": platform.system,
+        "WIN32EDITION": platform.win32_edition,
+        "WIN32VER": platform.win32_ver,
+        "MACOSVER": platform.mac_ver,
+        "MACHINETYPE": platform.machine,
+        "PLATFORM": platform.platform,
+        "CPUCOUNT": os.cpu_count,
+        "LOGIN": os.getlogin,
+        "PID": os.getpid
     }
 )
 # endregion
 
 
 class Shell(PromptSession):
-    def envirotize(self, string) -> str:
-        "Applies Environment variables"
+    def envirotize(self, string: str) -> str:
+        """Applies environment variables and aliases
+
+        Args:
+            string (str): Input string
+
+        Returns:
+            str: Evaluated string
+        """
 
         def expandvars(string, default=None, skip_escaped=False):
             """Expand environment variables of form $var and ${var}.
@@ -259,7 +307,19 @@ class Shell(PromptSession):
                          style=self.style,
                          history=self.history)
 
+    def update_return_code(self, return_code: int):
+        promptvar.vars.update({"RETURNCODE": return_code})
+
     def resolver(self, userInput=None):
+        """Process string as command
+
+        Args:
+            userInput (str, optional): String, that will be evaluated. Defaults to None.
+
+        Returns:
+            None
+        """
+
         global functions
         self.userInput = userInput
         self.file = None
@@ -268,7 +328,7 @@ class Shell(PromptSession):
         if self.userInput == "":
             return
 
-        def pipe(uI):
+        def filepipe(uI):
             if len(uI.split(">")) == 2:
                 self.userInput, _file = uI.split(">")
                 self.mode = "w"
@@ -295,7 +355,8 @@ class Shell(PromptSession):
                 sys.stdout = mypipe = StringIO()
 
             try:
-                functions[splitInput[0]](self, *splitInput[1:])
+                return_code = 0 if functions[splitInput[0]](
+                    self, *splitInput[1:]) == None else 1
                 if catch == True:
                     result = mypipe.getvalue()
                     sys.stdout = old_stdout
@@ -305,20 +366,24 @@ class Shell(PromptSession):
                 if catch == True:
                     sys.stdout = old_stdout
                 try:
-                    os.chdir(os.path.expanduser(" ".join(splitInput)))
+                    return_code = 0 if functions["cd"](
+                        self, *splitInput[1:], command=False) == None else 1
                 except:
                     try:
                         output = eval(userInput)
                         if type(output) not in [object, type(dir), type(__class__)]:
                             result = output
+                            return_code = 0
                         else:
+                            return_code = 1
                             raise Exception
                     except:
                         if not catch:
-                            run_command(userInput)
+                            return_code = run_command(userInput)
                             result = None
                         else:
-                            result = communicate(userInput, stdin=stdin)
+                            result, return_code = communicate(
+                                userInput, stdin=stdin)
 
             if result != None:
                 if self.file != None:
@@ -329,30 +394,63 @@ class Shell(PromptSession):
                     if not catch:
                         print(result)
 
-            return result
+            return result, return_code
 
-        if len(self.userInput.split("&")) > 1:
-            instances = self.userInput.split("&")
+        if len(self.userInput.split(";")) > 1:
+            instances = self.userInput.split(";")
+            ret = 0
             for instance in instances:
-                catch = pipe(instance)
-                start(instance, catch=catch)
+                catch = filepipe(instance)
+                _, ret = start(instance, catch=catch)
+
+            self.update_return_code(ret)
+            return
+
+        if len(self.userInput.split("&&")) > 1:
+            instances = self.userInput.split("&&")
+            ret = 0
+            for instance in instances:
+                if ret == 0:
+                    catch = filepipe(instance)
+                    _, ret = start(instance, catch=catch)
+                else:
+                    self.update_return_code(ret)
+                    return
+            self.update_return_code(ret)
+            return
+
+        if len(self.userInput.split("||")) > 1:
+            instances = self.userInput.split("||")
+            ret = 1
+            for instance in instances:
+                if ret != 0:
+                    catch = filepipe(instance)
+                    _, ret = start(instance, catch=catch)
+                else:
+                    self.update_return_code(ret)
+                    return
+            self.update_return_code(ret)
             return
 
         if len(self.userInput.split("|")) > 1:
             instances = self.userInput.split("|")
-            
+
             _std = ""
             for instance in instances:
-                pipe(instance)
-                _std = start(instance, _std, catch=True)
+                filepipe(instance)
+                _std, return_code = start(instance, _std, catch=True)
             print(_std)
+            self.update_return_code(return_code)
             return
 
-        catch = pipe(self.userInput)
+        catch = filepipe(self.userInput)
 
-        start(self.userInput, catch=catch)
+        _, return_code = start(self.userInput, catch=catch)
+        self.update_return_code(return_code)
 
     def run(self):
+        """Start infinite shell loop or execute passed command"""
+
         if args.command:
             self.resolver(" ".join(args.command))
             return
@@ -370,7 +468,7 @@ class Shell(PromptSession):
                     if type(found) == type(isadmin) or type(found) == type(os.getcwd):
                         found = found()
 
-                    iprompt = iprompt.replace(item, found)
+                    iprompt = iprompt.replace(item, str(found))
 
                 self.resolver(self.prompt(HTML(iprompt)))
             except KeyboardInterrupt or EOFError:
