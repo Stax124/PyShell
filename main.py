@@ -140,9 +140,9 @@ def run_command(command: str):
 
     try:
         return os.system(command)
+
     except:
         print("Not found")
-
 
 def isadmin() -> bool:
     """Ask if run with elevated privileges
@@ -185,8 +185,6 @@ promptvar.vars.update(
 
 
 class Shell(PromptSession):
-    "Main class for displaying and manipulating shell or its configuration"
-
     def envirotize(self, string: str) -> str:
         """Applies environment variables and aliases
 
