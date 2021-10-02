@@ -125,6 +125,7 @@ def communicate(command: str, stdin: str = ""):
                                stdin=subprocess.PIPE, shell=True, universal_newlines=True, encoding="utf-8")
     process.stdin.write(stdin)
     output = process.communicate()[0]
+
     try:
         return (output, process.returncode)
     except:
@@ -146,7 +147,6 @@ def run_command(command: str):
 
     except:
         print("Not found")
-
 
 def isadmin() -> bool:
     """Ask if run with elevated privileges
@@ -364,8 +364,6 @@ class Shell(PromptSession):
                 sys.stdout = mypipe = StringIO()
 
             try:
-                print(1)
-                
                 return_code = 0 if functions[splitInput[0]](
                     self, *splitInput[1:]) == None else 1
                 if catch == True:
@@ -375,7 +373,6 @@ class Shell(PromptSession):
                 return_code = 1
                 pass
             except KeyError:
-                print(3)
                 if catch == True:
                     sys.stdout = old_stdout
                 try:
