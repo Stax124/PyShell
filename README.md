@@ -9,7 +9,7 @@
     <img src="public/terminal.png" alt="Logo" width="250">
   </a>
 
-  <h3 align="center">Shell</h3>
+  <h3 align="center">PyShell</h3>
 
   <p align="center">
     Custom shell, written in Python
@@ -230,7 +230,7 @@ Distributed under the GPL-3.0 License. See `LICENSE` for more information.
 
 Tomáš Novák - tamoncz@gmail.com
 
-Project Link: [https://github.com/Stax124/Shell](https://github.com/Stax124/Shell)
+Project Link: [https://github.com/Stax124/Shell](https://github.com/Stax124/PyShell)
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->

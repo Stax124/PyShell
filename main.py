@@ -125,7 +125,10 @@ def communicate(command: str, stdin: str = ""):
                                stdin=subprocess.PIPE, shell=True, universal_newlines=True, encoding="utf-8")
     process.stdin.write(stdin)
     output = process.communicate()[0]
-    return (output, process.returncode)
+    try:
+        return (output, process.returncode)
+    except:
+        return (output, None)
 
 
 def run_command(command: str):
@@ -144,6 +147,7 @@ def run_command(command: str):
     except:
         print("Not found")
 
+
 def isadmin() -> bool:
     """Ask if run with elevated privileges
 
@@ -160,7 +164,7 @@ def isadmin() -> bool:
     return _is_admin
 
 
-# region varinject
+# Dictionary for use in prompt
 promptvar.vars.update(
     {
         "RETURNCODE": 0,
@@ -181,10 +185,15 @@ promptvar.vars.update(
         "PID": os.getpid
     }
 )
-# endregion
 
 
 class Shell(PromptSession):
+    """Shell class with plugin support
+    
+    >>> app = Shell(verbose=args.verbose)
+    >>> app.run()
+    """
+    
     def envirotize(self, string: str) -> str:
         """Applies environment variables and aliases
 
@@ -355,14 +364,18 @@ class Shell(PromptSession):
                 sys.stdout = mypipe = StringIO()
 
             try:
+                print(1)
+                
                 return_code = 0 if functions[splitInput[0]](
                     self, *splitInput[1:]) == None else 1
                 if catch == True:
                     result = mypipe.getvalue()
                     sys.stdout = old_stdout
             except IndexError:
+                return_code = 1
                 pass
             except KeyError:
+                print(3)
                 if catch == True:
                     sys.stdout = old_stdout
                 try:
