@@ -1,8 +1,0 @@
-[Core]
-Name = MACLookup
-Module = maclookup
-
-[Documentation]
-Author = Tomáš Novák
-Version = 0.1
-Description = MAC Address lookup
