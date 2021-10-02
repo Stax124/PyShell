@@ -9,9 +9,8 @@ from client_config import ClientConfig
 APP_NAME = 'PyShell'
 APP_VERSION = '0.0.1'
 
+
 # Callback for pyupdater for displaying progress
-
-
 def print_status_info(info):
     total = info.get(u'total')
     downloaded = info.get(u'downloaded')
