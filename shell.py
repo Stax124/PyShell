@@ -2,7 +2,41 @@ import platform
 import os
 import pip
 
+from pyupdater.client import Client
+from client_config import ClientConfig
 
+# Information for pyupdater
+APP_NAME = 'PyShell'
+APP_VERSION = '0.0.1'
+
+# Callback for pyupdater for displaying progress
+
+
+def print_status_info(info):
+    total = info.get(u'total')
+    downloaded = info.get(u'downloaded')
+    status = info.get(u'status')
+    print(downloaded, total, status)
+
+
+# Initialize pyupdater client
+client = Client(ClientConfig())
+client.refresh()
+
+client.add_progress_hook(print_status_info)
+
+# Do update check
+app_update = client.update_check(APP_NAME, APP_VERSION)
+
+# If update is available, download it
+if app_update is not None:
+    app_update.download()
+
+# Restart the app
+if app_update.is_downloaded():
+    app_update.extract_restart()
+
+# Try to initialize the app
 try:
     import main
 except Exception as e:
