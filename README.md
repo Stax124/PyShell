@@ -21,6 +21,7 @@
 </p>
 
 <!-- TABLE OF CONTENTS -->
+
 - 1. [About The Project](#AboutTheProject)
   - 1.1. [Built With](#BuiltWith)
 - 2. [Getting Started](#GettingStarted)
@@ -34,10 +35,8 @@
 - 5. [Compiling](#Compiling)
 - 6. [Features](#Features)
   - 6.1. [Included plugins](#Includedplugins)
-    - 6.1.1. [MacLookup](#MacLookup)
-    - 6.1.2. [Networking](#Networking)
-    - 6.1.3. [SQLite](#SQLite)
-    - 6.1.4. [SSH Manager](#SSHManager)
+    - 6.1.1. [SQLite](#SQLite)
+    - 6.1.2. [SSH Manager](#SSHManager)
   - 6.2. [Customization](#Customization)
 - 7. [Roadmap](#Roadmap)
 - 8. [Contributing](#Contributing)
@@ -160,19 +159,11 @@ Output will be in `dist` directory.
 
 ### 6.1. <a name='Includedplugins'></a>Included plugins
 
-#### 6.1.1. <a name='MacLookup'></a>MacLookup
-
-- Find a device type by its MAC address
-
-#### 6.1.2. <a name='Networking'></a>Networking
-
-- Do a quick TCP/IP scan of target. (This is just a small utility, not a full-featured network scanner like `nmap`)
-
-#### 6.1.3. <a name='SQLite'></a>SQLite
+#### 6.1.1. <a name='SQLite'></a>SQLite
 
 - Connect to a SQLite database and execute queries
 
-#### 6.1.4. <a name='SSHManager'></a>SSH Manager
+#### 6.1.2. <a name='SSHManager'></a>SSH Manager
 
 - Save multiple ssh connection details and quickly connect to them
 
