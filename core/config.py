@@ -21,6 +21,8 @@ class Config():
     "Class for maintaining configuration information and files"
 
     def print_timestamp(self, *_str):
+        "Adds timecode to string"
+
         if self.colored:
             print(
                 f"{c.bold}[{c.end}{c.warning}{datetime.datetime.now().strftime('%H:%M:%S')}{c.end}{c.bold}]{c.end}", *_str)
@@ -28,6 +30,8 @@ class Config():
             print(f"[{datetime.datetime.now().strftime('%H:%M:%S')}]", *_str)
 
     def load(self):
+        "Load config from file or fall back to defaults"
+
         if self.verbose:
             if self.colored:
                 self.print_timestamp(f"{c.bold}Loading config...{c.end}")
@@ -84,25 +88,30 @@ class Config():
     def __init__(self, verbose=False, colored=True):
         if platform.system() == "Windows":
             self.CONFIG = os.environ["userprofile"] + \
-                r"\.voidshell"  # Rename this
+                r"\.pyshell"  # Rename this
         else:
             # Rename this ... alternative for linux or Unix based systems
-            self.CONFIG = os.path.expanduser("~")+r"/.voidshell"
+            self.CONFIG = os.path.expanduser("~")+r"/.pyshell"
         self.config = {}
         self.colored = colored
         self.verbose = verbose
         self.fallback = {}
 
     def save(self):
+        "Save config data to file"
+
         try:
             with open(self.CONFIG, "w", encoding="utf-8") as f:
                 json.dump(self.config, f, indent=4, ensure_ascii=False)
         except:
             self.print_timestamp(f"Unable to save data to {self.CONFIG}")
 
-    def json_str(self):
+    def json_str(self) -> str:
+        "Dump configuration as string"
+
         return json.dumps(self.config)
 
+    # Magic methods
     def __repr__(self):
         return self.config
 

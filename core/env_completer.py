@@ -7,7 +7,7 @@ from prompt_toolkit.document import Document
 
 class EnvCompleter(Completer):
     """
-    Complete for Path variables.
+    Complete for environmental variables.
 
     :param get_paths: Callable which returns a list of directories to look into
                       when the user enters a relative path.

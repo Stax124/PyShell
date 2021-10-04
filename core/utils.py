@@ -1,19 +1,21 @@
-def time_reformat(duration: int):
-        minutes, seconds = divmod(duration, 60)
-        hours, minutes = divmod(minutes, 60)
-        days, hours = divmod(hours, 24)
+def time_reformat(duration: int) -> str:
+    "Format seconds to time in hours, minutes and secons"
 
-        duration = []
-        if days > 0:
-            duration.append('{} days'.format(int(days)))
-        if hours > 0:
-            duration.append('{} hours'.format(int(hours)))
-        if minutes > 0:
-            duration.append('{} minutes'.format(int(minutes)))
-        if seconds > 0:
-            duration.append('{} seconds'.format(seconds))
+    minutes, seconds = divmod(duration, 60)
+    hours, minutes = divmod(minutes, 60)
+    days, hours = divmod(hours, 24)
 
-        return ', '.join(duration)
+    duration = []
+    if days > 0:
+        duration.append('{} days'.format(int(days)))
+    if hours > 0:
+        duration.append('{} hours'.format(int(hours)))
+    if minutes > 0:
+        duration.append('{} minutes'.format(int(minutes)))
+    if seconds > 0:
+        duration.append('{} seconds'.format(seconds))
+
+    return ', '.join(duration)
 
 def get_size(bytes, suffix="B"):
     """

@@ -11,8 +11,8 @@ from yapsy.IPlugin import IPlugin
 
 
 def sqlite(shell, *querry):
-    fparser = argparse.ArgumentParser(prog="sshclient")
-    fparser.add_argument("database", help="Select what you want to do",
+    fparser = argparse.ArgumentParser(prog="sqlite")
+    fparser.add_argument("-d", "--database", help="Select what you want to do",
                          type=str, default=":memory:")
     try:
         fargs = fparser.parse_args(querry)
@@ -166,7 +166,6 @@ def sqlite(shell, *querry):
         )
 
         while True:
-            print("Hello world")
             try:
                 text = session.prompt("> ")
             except KeyboardInterrupt:
@@ -186,7 +185,7 @@ def sqlite(shell, *querry):
                     for message in messages:
                         print(message)
 
-        print("GoodBye!")
+        print("Closing...")
 
     db = fargs.database
     main(db)

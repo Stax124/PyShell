@@ -1,13 +1,18 @@
 import platform
 import os
 import pip
+import warnings
 
 from pyupdater.client import Client
+from pyupdater.client.updates import LibUpdate
 from client_config import ClientConfig
 
+# disable deprecation warnings
+warnings.filterwarnings("ignore", category=DeprecationWarning)
+
 # Information for pyupdater
-APP_NAME = 'PyShell'
-APP_VERSION = '0.0.1'
+APP_NAME = "PyShell"
+APP_VERSION = "0.0.1"
 
 
 # Callback for pyupdater for displaying progress
@@ -29,16 +34,25 @@ app_update = client.update_check(APP_NAME, APP_VERSION)
 
 # If update is available, download it
 if app_update is not None:
-    app_update.download()
+    if not (type(app_update) == LibUpdate):
+        app_update.download()
 
-# Restart the app
-if app_update.is_downloaded():
-    app_update.extract_restart()
+        # Overwrite the current file with the downloaded file and exit
+        if app_update.is_downloaded():
+            app_update.extract_overwrite()
+    else:
+        app_update.download()
 
-# Try to initialize the app
+        # Extract the library patch
+        if app_update.is_downloaded():
+            app_update.extract()
+
+# Initialize the app
 try:
     import main
 except Exception as e:
+
+    # If modules are not found, attempt to install them
     cwd = os.getcwd()
     dirname = os.path.dirname(os.path.abspath(__file__))
     os.chdir(dirname)
@@ -71,5 +85,7 @@ except Exception as e:
     os.chdir(cwd)
 
 finally:
+
+    # Run the app
     import main
     main.run()

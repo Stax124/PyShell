@@ -13,10 +13,6 @@ def _config(shell, *querry):
         print(json.dumps(shell.config.config, indent=4))
 
 
-def _ls(shell, *querry):
-    print(subprocess.check_output("dir", shell=True, universal_newlines=True))
-
-
 def _plugins(shell, *querry):
     for plugin in shell.manager.getAllPlugins():
         print(plugin.name)

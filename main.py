@@ -1,4 +1,7 @@
 # region Imports
+import prompt_toolkit
+from prompt_toolkit.key_binding.key_bindings import KeyBindings
+from prompt_toolkit.selection import SelectionState, SelectionType
 from pygit2 import Repository
 from prompt_toolkit.shortcuts.dialogs import yes_no_dialog
 from yapsy.PluginManager import PluginManager
@@ -19,19 +22,21 @@ from io import StringIO
 # endregion
 
 # region Prompt-toolkit
-from prompt_toolkit import PromptSession
-from prompt_toolkit.history import FileHistory
-from prompt_toolkit.enums import EditingMode
-from prompt_toolkit.output.color_depth import ColorDepth
-from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
-from prompt_toolkit.completion import ThreadedCompleter, NestedCompleter, merge_completers, ExecutableCompleter
-from prompt_toolkit.styles import Style
 from prompt_toolkit import HTML
+from prompt_toolkit import PromptSession
+from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
+from prompt_toolkit.clipboard.pyperclip import PyperclipClipboard
+from prompt_toolkit.completion import ThreadedCompleter, NestedCompleter, merge_completers, ExecutableCompleter
+from prompt_toolkit.enums import EditingMode
+from prompt_toolkit.history import FileHistory
+from prompt_toolkit.key_binding import KeyPressEvent
+from prompt_toolkit.output.color_depth import ColorDepth
+from prompt_toolkit.styles import Style
 # endregion
 
 # region Core
 from core import config as cfg
-from core import default, path_completer, env_completer, promptvar
+from core import default, path_completer, env_completer, promptvar, key_bindings
 # endregion
 
 
@@ -83,9 +88,6 @@ else:
         return os.access(name, os.X_OK)
 
 
-# region Git
-
-
 def getcurrentrepo():
     """Get branch of git repository in current folder
 
@@ -97,7 +99,6 @@ def getcurrentrepo():
         return Repository(r'.').head.shorthand
     except:
         return ""
-# endregion
 
 
 def timenow():
@@ -148,6 +149,7 @@ def run_command(command: str):
     except:
         print("Not found")
 
+
 def isadmin() -> bool:
     """Ask if run with elevated privileges
 
@@ -189,11 +191,11 @@ promptvar.vars.update(
 
 class Shell(PromptSession):
     """Shell class with plugin support
-    
+
     >>> app = Shell(verbose=args.verbose)
     >>> app.run()
     """
-    
+
     def envirotize(self, string: str) -> str:
         """Applies environment variables and aliases
 
@@ -248,6 +250,8 @@ class Shell(PromptSession):
         except:
             pass
 
+        self.clipboard = PyperclipClipboard()
+        self.key_bindings = key_bindings.keybindings
         self.config = cfg.Config(verbose=verbose, colored=True)
         self.config.load()
         self.config.fallback = {
@@ -314,7 +318,9 @@ class Shell(PromptSession):
                          color_depth=ColorDepth.TRUE_COLOR,
                          editing_mode=EditingMode.VI,
                          style=self.style,
-                         history=self.history)
+                         history=self.history,
+                         key_bindings=self.key_bindings,
+                         clipboard=self.clipboard)
 
     def update_return_code(self, return_code: int):
         promptvar.vars.update({"RETURNCODE": return_code})
@@ -484,7 +490,7 @@ class Shell(PromptSession):
             except KeyboardInterrupt or EOFError:
                 pass
             except SystemExit:
-                exit(0)
+                sys.exit(0)
             except:
                 result = yes_no_dialog(
                     title="Error occured", text=traceback.format_exc(chain=False), yes_text="Continue", no_text="Exit", style=self.dialog_style).run()
