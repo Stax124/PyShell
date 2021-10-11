@@ -1,5 +1,5 @@
 def time_reformat(duration: int) -> str:
-    "Format seconds to time in hours, minutes and secons"
+    "Format seconds to time in hours, minutes and seconds"
 
     minutes, seconds = divmod(duration, 60)
     hours, minutes = divmod(minutes, 60)
@@ -17,6 +17,30 @@ def time_reformat(duration: int) -> str:
 
     return ', '.join(duration)
 
+
+def time_reformat_short(duration: int) -> str:
+    "Format miliseconds to time in hours, minutes, seconds and miliseconds"
+
+    seconds, miliseconds = divmod(duration, 1000)
+    minutes, seconds = divmod(seconds, 60)
+    hours, minutes = divmod(minutes, 60)
+    days, hours = divmod(hours, 24)
+
+    duration = []
+    if days > 0:
+        duration.append('{}d'.format(days))
+    if hours > 0:
+        duration.append('{}h'.format(hours))
+    if minutes > 0:
+        duration.append('{}m'.format(minutes))
+    if seconds > 0:
+        duration.append('{}s'.format(seconds))
+    if miliseconds > 0:
+        duration.append('{}ms'.format(miliseconds))
+
+    return ' '.join(duration)
+
+
 def get_size(bytes, suffix="B"):
     """
     Scale bytes to its proper format
@@ -30,6 +54,7 @@ def get_size(bytes, suffix="B"):
             return f"{bytes:.2f}{unit}{suffix}"
         bytes /= factor
 
+
 def get_from_size(bytes, suffix="B"):
     """
     Scale bytes to its proper format
@@ -42,6 +67,7 @@ def get_from_size(bytes, suffix="B"):
         if bytes < factor:
             return f"{bytes:.2f}{unit}{suffix}"
         bytes *= factor
+
 
 def prime(l: list) -> list:
     """

@@ -1,15 +1,10 @@
 # region Imports
-import prompt_toolkit
-from prompt_toolkit.key_binding.key_bindings import KeyBindings
-from prompt_toolkit.selection import SelectionState, SelectionType
-from pygit2 import Repository
 from prompt_toolkit.shortcuts.dialogs import yes_no_dialog
 from yapsy.PluginManager import PluginManager
 from functions import functions
 import shlex
 import os
 import sys
-import getpass
 import argparse
 import subprocess
 import math
@@ -26,10 +21,9 @@ from prompt_toolkit import HTML
 from prompt_toolkit import PromptSession
 from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
 from prompt_toolkit.clipboard.pyperclip import PyperclipClipboard
-from prompt_toolkit.completion import ThreadedCompleter, NestedCompleter, merge_completers, ExecutableCompleter
+from prompt_toolkit.completion import ThreadedCompleter, NestedCompleter, merge_completers
 from prompt_toolkit.enums import EditingMode
 from prompt_toolkit.history import FileHistory
-from prompt_toolkit.key_binding import KeyPressEvent
 from prompt_toolkit.output.color_depth import ColorDepth
 from prompt_toolkit.styles import Style
 # endregion
@@ -62,18 +56,6 @@ else:
     args = parser.parse_args()
 # endregion
 
-# region CONSTATNTS
-try:
-    USER = getpass.getuser()
-except:
-    USER = "UNKNOWN"
-
-try:
-    DOMAIN = platform.node()
-except:
-    DOMAIN = "UNKNOWN"
-# endregion
-
 if platform.system() == "Windows":
     pathext = os.environ["PATHEXT"].split(os.pathsep)
 
@@ -86,30 +68,6 @@ if platform.system() == "Windows":
 else:
     def filter(name):
         return os.access(name, os.X_OK)
-
-
-def getcurrentrepo():
-    """Get branch of git repository in current folder
-
-    Returns:
-        str: branch of git repository
-    """
-
-    try:
-        return Repository(r'.').head.shorthand
-    except:
-        return ""
-
-
-def timenow():
-    """Get current time
-
-    Returns:
-        str: `Hour:Minute:Second`
-    """
-
-    return datetime.datetime.now().strftime(r"%H:%M:%S")
-
 
 def communicate(command: str, stdin: str = ""):
     """Execute command in shell and return stdout with returncode
@@ -164,29 +122,6 @@ def isadmin() -> bool:
         _is_admin = ctypes.windll.shell32.IsUserAnAdmin() != 0
 
     return _is_admin
-
-
-# Dictionary for use in prompt
-promptvar.vars.update(
-    {
-        "RETURNCODE": 0,
-        "DOMAIN": DOMAIN,
-        "USER": USER,
-        "PATH": os.getcwd,
-        "ROOT": "#" if isadmin == True else "$",
-        "REPO": getcurrentrepo,
-        "TIME": timenow,
-        "SYSTEM": platform.system,
-        "WIN32EDITION": platform.win32_edition,
-        "WIN32VER": platform.win32_ver,
-        "MACOSVER": platform.mac_ver,
-        "MACHINETYPE": platform.machine,
-        "PLATFORM": platform.platform,
-        "CPUCOUNT": os.cpu_count,
-        "LOGIN": os.getlogin,
-        "PID": os.getpid
-    }
-)
 
 
 class Shell(PromptSession):
