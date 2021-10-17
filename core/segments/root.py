@@ -23,6 +23,6 @@ def main(segment: dict):
     text = segment.get("properties", {}).get("root_icon", "")
 
     if isadmin():
-        return "", True
-    else:
         return text, False
+    else:
+        return "", True

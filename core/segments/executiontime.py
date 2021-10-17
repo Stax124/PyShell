@@ -1,4 +1,4 @@
-from .. import promptvar, utils
+import promptvar, utils
 
 
 def main(segment):
