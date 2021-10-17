@@ -10,6 +10,7 @@ from prompt_toolkit.styles import Style
 
 import promptvar
 import segment_handler
+import utils
 
 _b = "\""
 next_text = ""
@@ -33,6 +34,7 @@ def next_usable(usable_list: list, start_index: int = 0) -> int:
 
 def plain_builder(fg, bg, text, prefix="", postfix="") -> str:
     # Generate html string with style if bg or fg is set independently
+
     include_style = bg or fg
     full_string = "<style " if include_style else ""
 
@@ -49,6 +51,9 @@ def plain_builder(fg, bg, text, prefix="", postfix="") -> str:
 
 
 def diamond_builder(text, leading_diamond, trailing_diamond, fg=None, bg=None, prefix="", postfix="") -> str:
+
+    leading_diamond = utils.strip_tags(leading_diamond)
+    trailing_diamond = utils.strip_tags(trailing_diamond)
 
     # Generate html string with style if bg or fg is set independently
     include_style = bg or fg
@@ -103,13 +108,9 @@ def powerline_builder(last_segment, next_segment, powerline_symbol, text, fg=Non
     if text == "":
         return ""
 
-    last_fg = last_segment.get(
-        "foreground", "") if last_segment != None else ""
-
     if last_segment == None:
         if include_style:
-            if last_fg:
-                full_string += f"bg={_b}{bg}{_b} "
+            full_string += f"bg={_b}{bg}{_b} "
             full_string += f">{powerline_symbol}</style>"
         else:
             full_string += f"{powerline_symbol}"
@@ -170,7 +171,6 @@ def build(d: dict):
             segments = block["segments"]
 
             last_segment = None
-            current_segment = 0
 
             segment_text_list = []
 
@@ -185,7 +185,10 @@ def build(d: dict):
             for segment in segments:
 
                 text_inside = segment_text_list[index][0]
-                skip = False
+
+                if segment_text_list[index][1]:
+                    index += 1
+                    continue
 
                 properties = segment.get("properties", {})
 
@@ -212,9 +215,8 @@ def build(d: dict):
                     final_prompt += plain_builder(fg=fg, bg=bg,
                                                   text=text_inside, prefix=prefix, postfix=postfix)
                 if segment["style"] == "diamond":
-                    if not skip:
-                        final_prompt += diamond_builder(
-                            text_inside, leading_diamond, trailing_diamond, fg, bg, prefix, postfix)
+                    final_prompt += diamond_builder(
+                        text_inside, leading_diamond, trailing_diamond, fg, bg, prefix, postfix)
 
                 if segment["style"] == "powerline":
                     _next = next_usable(segment_text_list, index)
@@ -223,20 +225,19 @@ def build(d: dict):
                         last_segment, segments[_next] if _next != None else None, powerline_symbol, text_inside, fg, bg, prefix, postfix)
 
                 last_segment = segment
-                current_segment += 1
                 index += 1
                 full.append(text_inside)
 
-    # print(final_prompt)
+    print(final_prompt)
 
     return HTML(final_prompt)
 
 
 if __name__ == "__main__":
-    themes = ["agnoster.omp.json"]
+    themes = ["blueish.omp.json"]
 
-    # for _,_,j in os.walk("themes"):
-    #     themes = j
+    for _,_,j in os.walk("themes"):
+        themes = j
 
     for item in themes:
 
