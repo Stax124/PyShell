@@ -9,7 +9,7 @@
           "type": "session",
           "style": "diamond",
           "foreground": "#ffffff",
-          "background": "lightMagenta",
+          "background": "#FF77FF",
           "leading_diamond": "\uE0B6",
           "trailing_diamond": "",
           "properties": {
@@ -29,7 +29,7 @@
         {
           "type": "git",
           "style": "plain",
-          "foreground": "#ffffff",
+          "foreground": "#000000",
           "background": "lightCyan",
           "properties": {
             "branch_icon": "",
@@ -42,7 +42,7 @@
           "type": "time",
           "style": "diamond",
           "trailing_diamond": "\uE0B0",
-          "foreground": "#ffffff",
+          "foreground": "#000000",
           "background": "lightGreen",
           "properties": {
             "time_format": "15:04"

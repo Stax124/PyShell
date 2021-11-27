@@ -12,7 +12,7 @@
           "properties": {
             "root_icon": "root",
             "prefix": "",
-            "postfix": " <#ffffff>in</> "
+            "postfix": " in "
           }
         },
         {
@@ -29,7 +29,7 @@
           "style": "plain",
           "foreground": "#C678DD",
           "properties": {
-            "prefix": "<#ffffff>on</> ",
+            "prefix": "on ",
             "display_status": true
           }
         },
@@ -39,7 +39,7 @@
           "foreground": "#98C379",
           "properties": {
             "display_version": true,
-            "prefix": "<#ffffff>via</> \uE781 "
+            "prefix": "via \uE781 "
           }
         },
         {

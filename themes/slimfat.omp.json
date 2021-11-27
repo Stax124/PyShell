@@ -33,7 +33,7 @@
             "wsl": "\ue712",
             "wsl_separator": " on ",
             "windows": "\ue70f",
-            "postfix": "<#7a7a7a> \ue0b1</>"
+            "postfix": " \ue0b1"
           }
         },
         {
@@ -42,11 +42,11 @@
           "foreground": "#fafafa",
           "background": "#2f2f2f",
           "properties": {
-            "user_info_separator": "<#7a7a7a>\uf1fa</>",
+            "user_info_separator": "\uf1fa",
             "display_default": false,
             "user_color": "#77f5d6",
             "host_color": "#2EEFBF",
-            "postfix": "<#7a7a7a> \ue0b1</>"
+            "postfix": " \ue0b1"
           }
         },
         {
@@ -56,7 +56,7 @@
           "background": "#2f2f2f",
           "properties": {
             "root_icon": "\uF0E7",
-            "postfix": "<#7a7a7a> \ue0b1</>"
+            "postfix": " \ue0b1"
           }
         },
         {
@@ -65,10 +65,10 @@
           "foreground": "#fafafa",
           "background": "#2f2f2f",
           "properties": {
-            "prefix": "<#f2f200> \ue5ff </>",
+            "prefix": " \ue5ff ",
             "style": "full",
             "enable_hyperlink": false,
-            "folder_icon": "<#B5B2C2>\ue5fe </>"
+            "folder_icon": "\ue5fe "
           }
         },
         {
@@ -87,7 +87,7 @@
             "staging_color": "#2FDA4E",
             "ahead_color": "#2EC4B6",
             "behind_color": "#8A4FFF",
-            "prefix": "<#7a7a7a>\ue0b1 </>"
+            "prefix": "\ue0b1 "
           }
         },
         {
@@ -127,7 +127,7 @@
           "background": "#2f2f2f",
           "properties": {
             "prefix": " \uE718 ",
-            "postfix": "<#7a7a7a> \ue0b3</>"
+            "postfix": " \ue0b3"
           }
         },
         {
@@ -137,7 +137,7 @@
           "background": "#2f2f2f",
           "properties": {
             "prefix": " \uE235 ",
-            "postfix": "<#7a7a7a> \ue0b3</>"
+            "postfix": " \ue0b3"
           }
         },
         {
@@ -147,7 +147,7 @@
           "background": "#2f2f2f",
           "properties": {
             "prefix": " \uE77F ",
-            "postfix": "<#7a7a7a> \ue0b3</>"
+            "postfix": " \ue0b3"
           }
         },
         {
@@ -158,7 +158,7 @@
           "background": "#2f2f2f",
           "properties": {
             "time_format": "15:04:05",
-            "postfix": "<#007ACC> \uf64f </>"
+            "postfix": " \uf64f "
           }
         }
       ]
@@ -197,7 +197,7 @@
           "properties": {
             "threshold": 500,
             "style": "roundrock",
-            "postfix": "<#fafafa> \uf252 </>"
+            "postfix": " \uf252 "
           }
         },
         {

@@ -31,8 +31,8 @@
           "properties": {
             "branch_icon": "",
             "display_status": false,
-            "prefix": "<#5FAAE8>git:(</>",
-            "postfix": "<#5FAAE8>)</>"
+            "prefix": "git:(",
+            "postfix": ")"
           }
         },
         {

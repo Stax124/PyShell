@@ -42,7 +42,7 @@
           "foreground": "#ffffff",
           "background": "#007ACC",
           "properties": {
-            "prefix": "<#ffffff>\uE0B1</> ",
+            "prefix": "<white>\uE0B1</> ",
             "postfix": " "
           }
         },

@@ -69,6 +69,7 @@ else:
     def filter(name):
         return os.access(name, os.X_OK)
 
+
 def communicate(command: str, stdin: str = ""):
     """Execute command in shell and return stdout with returncode
 
@@ -258,7 +259,7 @@ class Shell(PromptSession):
                          clipboard=self.clipboard)
 
     def update_return_code(self, return_code: int):
-        promptvar.vars.update({"RETURNCODE": return_code})
+        promptvar.variables.update({"RETURNCODE": return_code})
 
     def resolver(self, userInput=None):
         """Process string as command
@@ -415,7 +416,7 @@ class Shell(PromptSession):
                     ipatternt = re.compile(r"[^$^{].+[^}]")
                     ifound = re.findall(ipatternt, item)[0]
 
-                    found = promptvar.vars[ifound]
+                    found = promptvar.variables[ifound]
                     if type(found) == type(isadmin) or type(found) == type(os.getcwd):
                         found = found()
 

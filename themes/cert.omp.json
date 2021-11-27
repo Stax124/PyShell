@@ -37,7 +37,7 @@
           "style": "diamond",
           "leading_diamond": "\uE0C7",
           "trailing_diamond": "\uE0C6",
-          "background": "lightCyan",
+          "background": "#58ffff",
           "foreground": "#fff",
           "properties": {
             "branch_icon": "",
@@ -52,7 +52,7 @@
           "leading_diamond": "\uE0C7",
           "trailing_diamond": "\uE0C6",
           "foreground": "#fff",
-          "background": "lightMagenta",
+          "background": "#FF77FF",
           "properties": {
             "time_format": "15:04",
             "prefix": " ",

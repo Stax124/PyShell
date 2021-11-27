@@ -84,7 +84,7 @@
             "always_enabled": true,
             "error_color": "#f1184c",
             "color_background": true,
-            "prefix": "<transparent>\uE0B0</> \uE23A"
+            "prefix": "\uE0B0 \uE23A"
           }
         }
       ]

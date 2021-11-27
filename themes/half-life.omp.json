@@ -37,7 +37,7 @@
           "style": "plain",
           "foreground": "#5FD7FF",
           "properties": {
-            "prefix": "<#ffffff>on</> ",
+            "prefix": "<white>on</> ",
             "branch_icon": "",
             "branch_ahead_icon": "",
             "branch_behind_icon": "",

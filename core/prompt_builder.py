@@ -10,7 +10,7 @@ from prompt_toolkit.styles import Style
 
 import promptvar
 import segment_handler
-import utils
+from utils import strip_tags
 
 _b = "\""
 next_text = ""
@@ -35,6 +35,9 @@ def next_usable(usable_list: list, start_index: int = 0) -> int:
 def plain_builder(fg, bg, text, prefix="", postfix="") -> str:
     # Generate html string with style if bg or fg is set independently
 
+    prefix = strip_tags(prefix)
+    postfix = strip_tags(postfix)
+
     include_style = bg or fg
     full_string = "<style " if include_style else ""
 
@@ -52,8 +55,8 @@ def plain_builder(fg, bg, text, prefix="", postfix="") -> str:
 
 def diamond_builder(text, leading_diamond, trailing_diamond, fg=None, bg=None, prefix="", postfix="") -> str:
 
-    leading_diamond = utils.strip_tags(leading_diamond)
-    trailing_diamond = utils.strip_tags(trailing_diamond)
+    leading_diamond = strip_tags(leading_diamond)
+    trailing_diamond = strip_tags(trailing_diamond)
 
     # Generate html string with style if bg or fg is set independently
     include_style = bg or fg
@@ -90,6 +93,9 @@ def diamond_builder(text, leading_diamond, trailing_diamond, fg=None, bg=None, p
 
 
 def powerline_builder(last_segment, next_segment, powerline_symbol, text, fg=None, bg=None, prefix="", postfix="") -> str:
+
+    prefix = strip_tags(prefix)
+    postfix = strip_tags(postfix)
 
     if next_segment != None:
         if next_segment.get("background", ""):
@@ -160,13 +166,16 @@ def build_old(str):
 def build(d: dict):
     final_prompt = ""
 
-    spacing = d.get("spacing", 1)
+    spacing = d.get("spacing", 0)
     blocks = d["blocks"]
 
     full = []
 
     for block in blocks:
         if block["type"] == "prompt" and block["alignment"] == "left":
+
+            if block.get("newline", False):
+                final_prompt += "\n"
 
             segments = block["segments"]
 
@@ -209,7 +218,7 @@ def build(d: dict):
                     fg = ""
 
                 # Add spacing if needed
-                final_prompt += f'{"" if final_prompt.__len__() > 0 else " "*spacing}'
+                final_prompt += f'{"" if final_prompt.__len__() <= 0 else " "*spacing}'
 
                 if segment["style"] == "plain":
                     final_prompt += plain_builder(fg=fg, bg=bg,
@@ -228,21 +237,19 @@ def build(d: dict):
                 index += 1
                 full.append(text_inside)
 
-    print(final_prompt)
-
     return HTML(final_prompt)
 
 
 if __name__ == "__main__":
-    themes = ["blueish.omp.json"]
-
-    for _,_,j in os.walk("themes"):
+    for _, _, j in os.walk("themes"):
         themes = j
+
+    themes.pop(themes.index("schema.json"))
 
     for item in themes:
 
         print(item)
-        filename = open("themes/"+item, "r")
+        filename = open("themes/"+item, "r", encoding="utf-8")
         data = json.load(filename)
 
         print_formatted_text(build(data),

@@ -76,7 +76,7 @@
             "wsl": "\ue712",
             "wsl_separator": " on ",
             "windows": "\ue70f",
-            "postfix": "<#ffea00> \ue0b1</>"
+            "postfix": " \ue0b1"
           }
         },
         {
@@ -86,11 +86,11 @@
           "background": "#2f2f2f",
           "properties": {
             "display_host": false,
-            "user_info_separator": "<#ffea00 >\uf1fa</>",
+            "user_info_separator": "\uf1fa",
             "display_default": false,
             "user_color": "#ffea00",
             "host_color": "#2EEFBF",
-            "postfix": "<#ffea00> \ue0b1</>"
+            "postfix": " \ue0b1"
           }
         },
         {
@@ -100,7 +100,7 @@
           "background": "#2f2f2f",
           "properties": {
             "root_icon": "\uF0E7",
-            "postfix": "<#ffea00> \ue0b1</>"
+            "postfix": " \ue0b1"
           }
         },
         {
@@ -109,12 +109,12 @@
           "foreground": "#fafafa",
           "background": "#2f2f2f",
           "properties": {
-            "prefix": "<#f2f200> \ue5ff </>",
+            "prefix": " \ue5ff ",
             "style": "agnoster_short",
             "enable_hyperlink": true,
             "home_icon": "\uF7DB ",
-            "folder_icon": "<#B5B2C2>\ue5fe </>",
-            "folder_separator_icon": "<#ffea00>\uE0B1 </>"
+            "folder_icon": "\ue5fe ",
+            "folder_separator_icon": "\uE0B1 "
           }
         },
         {
@@ -133,7 +133,7 @@
             "staging_color": "#2FDA4E",
             "ahead_color": "#2EC4B6",
             "behind_color": "#8A4FFF",
-            "prefix": "<#ffea00>\ue0b1 </>"
+            "prefix": "\ue0b1 "
           }
         },
         {

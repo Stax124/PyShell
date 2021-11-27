@@ -12,7 +12,7 @@
           "properties": {
             "prefix": "",
             "postfix": "",
-            "text": "<#C591E8>\u276F</><#69FF94>\u276F</>"
+            "text": "\u276F\u276F"
           }
         },
         {
@@ -30,8 +30,8 @@
           "properties": {
             "branch_icon": "",
             "display_status": false,
-            "prefix": "<#5FAAE8>git:(</>",
-            "postfix": "<#5FAAE8>)</>"
+            "prefix": "git:(",
+            "postfix": ")"
           }
         },
         {

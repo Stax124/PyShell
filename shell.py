@@ -3,49 +3,49 @@ import os
 import pip
 import warnings
 
-from pyupdater.client import Client
-from pyupdater.client.updates import LibUpdate
-from client_config import ClientConfig
+# from pyupdater.client import Client
+# from pyupdater.client.updates import LibUpdate
+# from client_config import ClientConfig
 
-# disable deprecation warnings
-warnings.filterwarnings("ignore", category=DeprecationWarning)
+# # disable deprecation warnings
+# warnings.filterwarnings("ignore", category=DeprecationWarning)
 
-# Information for pyupdater
-APP_NAME = "PyShell"
-APP_VERSION = "0.0.1"
-
-
-# Callback for pyupdater for displaying progress
-def print_status_info(info):
-    total = info.get(u'total')
-    downloaded = info.get(u'downloaded')
-    status = info.get(u'status')
-    print(downloaded, total, status)
+# # Information for pyupdater
+# APP_NAME = "PyShell"
+# APP_VERSION = "0.0.1"
 
 
-# Initialize pyupdater client
-client = Client(ClientConfig())
-client.refresh()
+# # Callback for pyupdater for displaying progress
+# def print_status_info(info):
+#     total = info.get(u'total')
+#     downloaded = info.get(u'downloaded')
+#     status = info.get(u'status')
+#     print(downloaded, total, status)
 
-client.add_progress_hook(print_status_info)
 
-# Do update check
-app_update = client.update_check(APP_NAME, APP_VERSION)
+# # Initialize pyupdater client
+# client = Client(ClientConfig())
+# client.refresh()
 
-# If update is available, download it
-if app_update is not None:
-    if not (type(app_update) == LibUpdate):
-        app_update.download()
+# client.add_progress_hook(print_status_info)
 
-        # Overwrite the current file with the downloaded file and exit
-        if app_update.is_downloaded():
-            app_update.extract_overwrite()
-    else:
-        app_update.download()
+# # Do update check
+# app_update = client.update_check(APP_NAME, APP_VERSION)
 
-        # Extract the library patch
-        if app_update.is_downloaded():
-            app_update.extract()
+# # If update is available, download it
+# if app_update is not None:
+#     if not (type(app_update) == LibUpdate):
+#         app_update.download()
+
+#         # Overwrite the current file with the downloaded file and exit
+#         if app_update.is_downloaded():
+#             app_update.extract_overwrite()
+#     else:
+#         app_update.download()
+
+#         # Extract the library patch
+#         if app_update.is_downloaded():
+#             app_update.extract()
 
 # Initialize the app
 try:

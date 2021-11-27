@@ -12,8 +12,8 @@
           "properties": {
             "user_info_separator": "",
             "display_host": false,
-            "prefix": "<#CB4B16>┏[</>",
-            "postfix": "<#CB4B16>]</>"
+            "prefix": "<crimson>┏[</>",
+            "postfix": "<crimson>]</>"
           }
         },
         {
@@ -21,8 +21,8 @@
           "style": "plain",
           "foreground": "#ffffff",
           "properties": {
-            "prefix": "<#CB4B16>[</>",
-            "postfix": "<#CB4B16>]</>"
+            "prefix": "<crimson>[</>",
+            "postfix": "<crimson>]</>"
           }
         },
         {
@@ -30,8 +30,8 @@
           "style": "plain",
           "foreground": "#ffffff",
           "properties": {
-            "prefix": "<#CB4B16>[</>",
-            "postfix": "<#CB4B16>]</>"
+            "prefix": "<crimson>[</>",
+            "postfix": "<crimson>]</>"
           }
         },
         {
@@ -39,8 +39,8 @@
           "style": "plain",
           "foreground": "#ffffff",
           "properties": {
-            "prefix": "<#CB4B16>[x</>",
-            "postfix": "<#CB4B16>]</>"
+            "prefix": "<crimson>[x</>",
+            "postfix": "<crimson>]</>"
           }
         }
       ]
@@ -56,8 +56,8 @@
           "foreground": "#ffffff",
           "properties": {
             "style": "full",
-            "prefix": "<#CB4B16>┖[</>",
-            "postfix": "<#CB4B16>]></>"
+            "prefix": "<crimson>┖[</>",
+            "postfix": "<crimson>]></>"
           }
         }
       ]

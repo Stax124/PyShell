@@ -164,7 +164,7 @@
             "always_enabled": true,
             "error_color": "#f1184c",
             "color_background": true,
-            "prefix": "<#83769c></> "
+            "prefix": " "
           }
         }
       ]
@@ -178,8 +178,8 @@
           "foreground": "#ffffff",
           "background": "#0077c2",
           "properties": {
-            "prefix": "<#0077c2,transparent>\uE0B6</>  ",
-            "postfix": " <transparent,#0077c2>\uE0B2</>"
+            "prefix": "<transparent>\uE0B6</>  ",
+            "postfix": " <transparent>\uE0B2</>"
           }
         },
         {

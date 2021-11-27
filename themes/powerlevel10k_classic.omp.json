@@ -11,7 +11,8 @@
           "foreground": "#26C6DA",
           "background": "#546E7A",
           "properties": {
-            "postfix": " \uE0B1"
+            "prefix": " ",
+            "postfix": " \uE0B1 "
           }
         },
         {
@@ -36,7 +37,8 @@
           "foreground": "#D4E157",
           "background": "#546E7A",
           "properties": {
-            "prefix": "<#26C6DA>\uE0B1 </>"
+            "prefix": "\uE0B1 ",
+            "postfix": " "
           }
         },
         {
@@ -48,32 +50,6 @@
             "text": "\uE0B0",
             "prefix": "",
             "postfix": ""
-          }
-        }
-      ]
-    },
-    {
-      "type": "prompt",
-      "alignment": "right",
-      "segments": [
-        {
-          "type": "session",
-          "style": "diamond",
-          "foreground": "#D4E157",
-          "background": "#546E7A",
-          "leading_diamond": "\uE0B2",
-          "properties": {
-            "postfix": " <#26C6DA>\uE0B3</> "
-          }
-        },
-        {
-          "type": "time",
-          "style": "plain",
-          "foreground": "#D4E157",
-          "background": "#546E7A",
-          "properties": {
-            "time_format": "15:04:05",
-            "postfix": " \uF017 "
           }
         }
       ]

@@ -28,7 +28,7 @@
 					"invert_powerline": false,
 					"foreground": "cyan",
 					"properties": {
-            "prefix": "<#ffffff>in</> ",
+            "prefix": "in ",
 						"style": "folder"
 					}
 				},
@@ -38,10 +38,10 @@
 					"invert_powerline": false,
 					"foreground": "#ff94df",
 					"properties": {
-						"branch_icon": " <#ff94df><b> </b></>",
+						"branch_icon": " <b> </b>",
 						"display_stash_count": true,
 						"display_status": false,
-						"prefix": "<#ffffff>on</> "
+						"prefix": "on "
 					}
 				},
 

@@ -49,8 +49,8 @@
               "properties": {
                 "branch_icon": "",
                 "display_status": false,
-                "prefix": "<#E8CC97>git(</>",
-                "postfix": "<#E8CC97>) </>"
+                "prefix": "<BurlyWood>git(</>",
+                "postfix": "<BurlyWood>) </>"
               }
             },
             {

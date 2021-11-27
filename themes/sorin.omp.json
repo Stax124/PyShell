@@ -34,7 +34,7 @@
           "style": "plain",
           "foreground": "#C1C106",
           "properties": {
-            "prefix": "<#ffffff>git:</>"
+            "prefix": "git:"
           }
         },
         {
@@ -51,7 +51,7 @@
           "foreground": "#ffffff",
           "properties": {
             "prefix": "",
-            "text": "<#CB4B16>\u276F</><#CACA02>\u276F</><#4E9A06>\u276F</>"
+            "text": "\u276F\u276F\u276F"
           }
         }
       ]
