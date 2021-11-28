@@ -6,56 +6,53 @@
       "alignment": "left",
       "segments": [
         {
-          "type": "session",
+          "type": "root",
           "style": "plain",
-          "foreground": "#E36464",
+          "foreground": "#CECE04",
           "properties": {
-            "user_info_separator": "",
-            "display_host": false,
-            "prefix": "@"
+            "prefix": "",
+            "root_icon": "#"
           }
         },
         {
-          "type": "text",
+          "type": "session",
           "style": "plain",
-          "foreground": "#62ED8B",
           "properties": {
-            "text": "\u279C",
-            "postfix": "",
             "prefix": ""
           }
         },
         {
           "type": "path",
           "style": "plain",
-          "foreground": "#56B6C2",
+          "foreground": "#7B68EE",
           "properties": {
-            "style": "folder",
-            "postfix": ""
+            "style": "agnoster_short",
+            "prefix": ""
           }
         },
         {
           "type": "git",
           "style": "plain",
-          "foreground": "#D4AAFC",
+          "foreground": "#48D1CC",
           "properties": {
+            "prefix": "HEAD:",
             "branch_icon": "",
-            "prefix": " <#DDB15F>git(</>",
-            "postfix": "<#DDB15F>)</>",
-            "template": "{{ .HEAD }}"
+            "fetch_upstream_icon": false,
+            "template": "{{ .UpstreamIcon }}{{ .HEAD }}"
           }
         },
         {
           "type": "exit",
           "style": "plain",
-          "foreground": "#DCB977",
+          "foreground": "#7FFFD4",
+          "foreground_templates": ["{{ if gt .Code 0 }}#E84855{{ end }}"],
           "properties": {
-            "template": "\uF119",
-            "postfix": ""
+            "always_enabled": true,
+            "template": "<#66CDAA>\u276F</><#76EEC6>\u276F</><foreground>\u276F</>",
+            "prefix": ""
           }
         }
       ]
     }
-  ],
-  "final_space": true
+  ]
 }

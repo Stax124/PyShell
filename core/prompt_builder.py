@@ -10,7 +10,7 @@ from prompt_toolkit.styles import Style
 
 import promptvar
 import segment_handler
-from utils import strip_tags
+import constants
 
 _b = "\""
 next_text = ""
@@ -35,8 +35,8 @@ def next_usable(usable_list: list, start_index: int = 0) -> int:
 def plain_builder(fg, bg, text, prefix="", postfix="") -> str:
     # Generate html string with style if bg or fg is set independently
 
-    prefix = strip_tags(prefix)
-    postfix = strip_tags(postfix)
+    prefix = handle_hex_colors(prefix)
+    postfix = handle_hex_colors(postfix)
 
     include_style = bg or fg
     full_string = "<style " if include_style else ""
@@ -55,8 +55,8 @@ def plain_builder(fg, bg, text, prefix="", postfix="") -> str:
 
 def diamond_builder(text, leading_diamond, trailing_diamond, fg=None, bg=None, prefix="", postfix="") -> str:
 
-    leading_diamond = strip_tags(leading_diamond)
-    trailing_diamond = strip_tags(trailing_diamond)
+    leading_diamond = handle_hex_colors(leading_diamond)
+    trailing_diamond = handle_hex_colors(trailing_diamond)
 
     # Generate html string with style if bg or fg is set independently
     include_style = bg or fg
@@ -94,8 +94,8 @@ def diamond_builder(text, leading_diamond, trailing_diamond, fg=None, bg=None, p
 
 def powerline_builder(last_segment, next_segment, powerline_symbol, text, fg=None, bg=None, prefix="", postfix="") -> str:
 
-    prefix = strip_tags(prefix)
-    postfix = strip_tags(postfix)
+    prefix = handle_hex_colors(prefix)
+    postfix = handle_hex_colors(postfix)
 
     if next_segment != None:
         if next_segment.get("background", ""):
@@ -163,10 +163,58 @@ def build_old(str):
         iprompt = iprompt.replace(item, str(found))
 
 
+# change string from '<#hexvalue>text</> to <style fg="hexvalue">text</style>'
+def handle_hex_colors(text):
+    if text == "":
+        return ""
+
+    # (<#[0-9a-fA-F]{6}>)
+    # (<#[0-9a-fA-F]{6}>)|(<[a-zA-Z]*>)|(<#[0-9a-fA-F]{6},[a-zA-Z]*>)|(<[a-zA-Z]*,#[0-9a-fA-F]{6}>)
+    pattern = re.compile(
+        r"(<#[0-9a-fA-F]{6}>)|(<[a-zA-Z]*>)|(<#[0-9a-fA-F]{6},[a-zA-Z]*>)|(<[a-zA-Z]*,#[0-9a-fA-F]{6}>)|(<[a-zA-Z]*,[a-zA-Z]*>)")
+    found = re.findall(pattern, text)
+
+    found = [i for i in list(found[0]) if i != ''] if found else []
+
+    print(found) if found else ""
+
+    for item in found:
+        _item = item
+        item = item.replace("<", "").replace(">", "").split(",")
+        if len(item) == 2:
+            fg = item[0]
+            bg = item[1]
+        elif len(item) == 1:
+            fg = item[0]
+            bg = None
+        else:
+            # Print error with red color
+            print("[31mError: Invalid color format[0m", item)
+
+        if fg.strip() in constants.disabled_colors:
+            fg = None
+        if bg:
+            if bg.strip() in constants.disabled_colors:
+                bg = None
+                
+        print(item, _item, (fg, bg))
+
+        first = f"fg={_b}{fg}{_b}" if fg else ""
+        second = f"bg={_b}{bg}{_b}" if bg else ""
+
+        text = text.replace(_item, f"<style {first} {second}>")
+        text = text.replace(f"</>", "</style>")
+
+    return text
+
+
 def build(d: dict):
+
+    # TODO: Change segments to a list of segments instead of building the string
+
     final_prompt = ""
 
-    spacing = d.get("spacing", 0)
+    spacing = d.get("spacing", 1)
     blocks = d["blocks"]
 
     full = []
@@ -209,16 +257,31 @@ def build(d: dict):
                 prefix = properties.get("prefix", "")
                 postfix = properties.get("postfix", "")
 
-                # Color exceptions
-                disabled_colors = ["transparent"]
+                # Handle named colors that are not present in the prompt-toolkit library
+                if fg in constants.colors:
+                    fg = constants.colors[fg]
+                if bg in constants.colors:
+                    bg = constants.colors[bg]
 
-                if bg in disabled_colors:
+                leading_diamond = handle_hex_colors(leading_diamond)
+                trailing_diamond = handle_hex_colors(trailing_diamond)
+                prefix = handle_hex_colors(prefix)
+                postfix = handle_hex_colors(postfix)
+
+                # Color exceptions
+                if bg in constants.disabled_colors:
                     bg = ""
-                if fg in disabled_colors:
+                if fg in constants.disabled_colors:
                     fg = ""
 
+                # Get next usable segment
+                _next = next_usable(segment_text_list, index)
+
                 # Add spacing if needed
-                final_prompt += f'{"" if final_prompt.__len__() <= 0 else " "*spacing}'
+                # TODO fix spacing - it's not working
+                postfix += " "*spacing if _next != None and final_prompt != "" else ""
+
+                text_inside = handle_hex_colors(text_inside)
 
                 if segment["style"] == "plain":
                     final_prompt += plain_builder(fg=fg, bg=bg,
@@ -228,8 +291,6 @@ def build(d: dict):
                         text_inside, leading_diamond, trailing_diamond, fg, bg, prefix, postfix)
 
                 if segment["style"] == "powerline":
-                    _next = next_usable(segment_text_list, index)
-
                     final_prompt += powerline_builder(
                         last_segment, segments[_next] if _next != None else None, powerline_symbol, text_inside, fg, bg, prefix, postfix)
 
@@ -237,6 +298,7 @@ def build(d: dict):
                 index += 1
                 full.append(text_inside)
 
+    print(final_prompt)
     return HTML(final_prompt)
 
 
@@ -245,6 +307,11 @@ if __name__ == "__main__":
         themes = j
 
     themes.pop(themes.index("schema.json"))
+
+    themes.sort()
+
+    # themes = ["blue-owl.omp.json"]
+    # themes = ["atomicBit.omp.json"]
 
     for item in themes:
 

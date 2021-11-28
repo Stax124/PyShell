@@ -3,19 +3,31 @@
   "$id": "http://example.com/example.json",
   "type": "object",
   "title": "The Oh My Posh theme definition",
-  "description": "https://ohmyposh.dev/docs/configure",
+  "description": "https://ohmyposh.dev/docs/config-overview",
   "definitions": {
     "color": {
+      "anyOf": [
+        { "$ref": "#/definitions/color_string" },
+        { "$ref": "#/definitions/palette_reference" }
+      ]
+    },
+    "color_string": {
       "type": "string",
-      "pattern": "^(#([a-fA-F0-9]{6}|[a-fA-F0-9]{3})|black|red|green|yellow|blue|magenta|cyan|white|default|darkGray|lightRed|lightGreen|lightYellow|lightBlue|lightMagenta|lightCyan|lightWhite|transparent)$",
+      "pattern": "^(#([a-fA-F0-9]{6}|[a-fA-F0-9]{3})|black|red|green|yellow|blue|magenta|cyan|white|default|darkGray|lightRed|lightGreen|lightYellow|lightBlue|lightMagenta|lightCyan|lightWhite|transparent|parentBackground|parentForeground|background|foreground)$",
       "title": "Color string",
-      "description": "https://ohmyposh.dev/docs/configure#colors",
+      "description": "https://ohmyposh.dev/docs/config-colors",
       "format": "color"
+    },
+    "palette_reference": {
+      "type": "string",
+      "pattern": "^p:.*$",
+      "title": "Palette reference",
+      "description": "https://ohmyposh.dev/docs/config-colors#palette"
     },
     "color_templates": {
       "type": "array",
       "title": "Templates to define a color",
-      "description": "https://ohmyposh.dev/docs/configure#foreground-templates",
+      "description": "https://ohmyposh.dev/docs/config-overview#foreground-templates",
       "default": [],
       "items": {
         "type": "string"
@@ -53,14 +65,11 @@
       "default": ""
     },
     "template": {
-      "type": "string",
-      "title": "Template text",
-      "description": "The template to use to render the segment text",
-      "default": ""
+      "$ref": "#/definitions/template"
     },
     "block": {
       "type": "object",
-      "description": "https://ohmyposh.dev/docs/configure#block",
+      "description": "https://ohmyposh.dev/docs/config-overview#block",
       "allOf": [
         {
           "if": {
@@ -89,37 +98,37 @@
         "type": {
           "type": "string",
           "title": "Block type",
-          "description": "https://ohmyposh.dev/docs/configure#type",
+          "description": "https://ohmyposh.dev/docs/config-overview#type",
           "enum": ["prompt", "rprompt"],
           "default": "prompt"
         },
         "alignment": {
           "type": "string",
           "title": "Block alignment",
-          "description": "https://ohmyposh.dev/docs/configure#alignment",
+          "description": "https://ohmyposh.dev/docs/config-overview#alignment",
           "enum": ["left", "right"],
           "default": "left"
         },
         "newline": {
           "type": "boolean",
           "title": "Newline",
-          "description": "https://ohmyposh.dev/docs/configure#newline",
+          "description": "https://ohmyposh.dev/docs/config-overview#newline",
           "default": false
         },
         "vertical_offset": {
           "type": "integer",
           "title": "Block vertical offset",
-          "description": "https://ohmyposh.dev/docs/configure#vertical-offset"
+          "description": "https://ohmyposh.dev/docs/config-overview#vertical-offset"
         },
         "horizontal-offset": {
           "type": "integer",
           "title": "Block vertical offset",
-          "description": "https://ohmyposh.dev/docs/configure#horizontal-offset"
+          "description": "https://ohmyposh.dev/docs/config-overview#horizontal-offset"
         },
         "segments": {
           "type": "array",
           "title": "Segments list, prompt elements to display based on context",
-          "description": "https://ohmyposh.dev/docs/configure#segment",
+          "description": "https://ohmyposh.dev/docs/config-overview#segment",
           "default": [],
           "items": { "$ref": "#/definitions/segment" }
         }
@@ -128,14 +137,14 @@
     "segment": {
       "type": "object",
       "title": "A segment",
-      "description": "https://ohmyposh.dev/docs/configure#segment",
+      "description": "https://ohmyposh.dev/docs/config-overview#segment",
       "default": {},
       "required": ["type", "style"],
       "properties": {
         "type": {
           "type": "string",
           "title": "Segment Type",
-          "description": "https://ohmyposh.dev/docs/configure#type-1",
+          "description": "https://ohmyposh.dev/docs/config-overview#type-1",
           "enum": [
             "session",
             "path",
@@ -168,13 +177,18 @@
             "crystal",
             "dart",
             "rust",
-            "owm"
+            "owm",
+            "sysinfo",
+            "angular",
+            "php",
+            "wifi",
+            "regquery"
           ]
         },
         "style": {
           "type": "string",
           "title": "Segment Style",
-          "description": "https://ohmyposh.dev/docs/configure#style",
+          "description": "https://ohmyposh.dev/docs/config-overview#style",
           "enum": ["powerline", "plain", "diamond"]
         },
         "foreground": { "$ref": "#/definitions/color" },
@@ -184,25 +198,25 @@
         "properties": {
           "type": "object",
           "title": "Segment Properties, used to change behavior/displaying",
-          "description": "https://ohmyposh.dev/docs/configure#properties",
+          "description": "https://ohmyposh.dev/docs/config-overview#properties",
           "default": {},
           "properties": {
             "prefix": {
               "type": "string",
               "title": "Text prefix",
-              "description": "https://ohmyposh.dev/docs/configure#prefix",
+              "description": "https://ohmyposh.dev/docs/config-overview#prefix",
               "default": " "
             },
             "postfix": {
               "type": "string",
               "title": "Text postfix",
-              "description": "https://ohmyposh.dev/docs/configure#postfix",
+              "description": "https://ohmyposh.dev/docs/config-overview#postfix",
               "default": " "
             },
             "include_folders": {
               "type": "array",
               "title": "If specified, segment will only render in these folders",
-              "description": "https://ohmyposh.dev/docs/configure#include--exclude-folders",
+              "description": "https://ohmyposh.dev/docs/config-overview#include--exclude-folders",
               "default": [],
               "items": {
                 "type": "string"
@@ -211,7 +225,7 @@
             "exclude_folders": {
               "type": "array",
               "title": "Exclude rendering in these folders",
-              "description": "https://ohmyposh.dev/docs/configure#include--exclude-folders",
+              "description": "https://ohmyposh.dev/docs/config-overview#include--exclude-folders",
               "default": [],
               "items": {
                 "type": "string"
@@ -220,7 +234,7 @@
             "ignore_folders": {
               "type": "array",
               "title": "Deprecated - please use `exclude_folders` instead",
-              "description": "https://ohmyposh.dev/docs/configure#include--exclude-folders",
+              "description": "https://ohmyposh.dev/docs/config-overview#include--exclude-folders",
               "default": [],
               "items": {
                 "type": "string"
@@ -242,13 +256,13 @@
               "powerline_symbol": {
                 "type": "string",
                 "title": "Powerline Symbol",
-                "description": "https://ohmyposh.dev/docs/configure#powerline-symbol",
+                "description": "https://ohmyposh.dev/docs/config-overview#powerline-symbol",
                 "default": "\uE0B0"
               },
               "invert_powerline": {
                 "type": "boolean",
                 "title": "Flip the Powerline symbol vertically",
-                "description": "https://ohmyposh.dev/docs/configure#invert-powerline",
+                "description": "https://ohmyposh.dev/docs/config-overview#invert-powerline",
                 "default": false
               }
             }
@@ -265,13 +279,13 @@
               "leading_diamond": {
                 "type": "string",
                 "title": "Leading diamond",
-                "description": "https://ohmyposh.dev/docs/configure#leading-diamond",
+                "description": "https://ohmyposh.dev/docs/config-overview#leading-diamond",
                 "default": ""
               },
               "trailing_diamond": {
                 "type": "string",
                 "title": "Trailing diamond",
-                "description": "https://ohmyposh.dev/docs/configure#trailing-diamond",
+                "description": "https://ohmyposh.dev/docs/config-overview#trailing-diamond",
                 "default": ""
               }
             }
@@ -289,23 +303,8 @@
             "properties": {
               "properties": {
                 "properties": {
-                  "display_id": {
-                    "type": "boolean",
-                    "title": "Display ID",
-                    "description": "Display the subscription ID or not",
-                    "default": false
-                  },
-                  "display_name": {
-                    "type": "boolean",
-                    "title": "Display Name",
-                    "description": "Display the subscription name or not",
-                    "default": true
-                  },
-                  "info_separator": {
-                    "type": "string",
-                    "title": "Display Name",
-                    "description": "Text/icon to put in between the subscription name and ID",
-                    "default": " | "
+                  "template": {
+                    "$ref": "#/definitions/template"
                   }
                 }
               }
@@ -324,12 +323,6 @@
             "properties": {
               "properties": {
                 "properties": {
-                  "battery_icon": {
-                    "type": "string",
-                    "title": "Battery Icon",
-                    "description": "Text/icon to use as a prefix for the battery percentage",
-                    "default": ""
-                  },
                   "display_error": {
                     "type": "boolean",
                     "title": "Display Error",
@@ -351,23 +344,8 @@
                   "charged_icon": {
                     "type": "string",
                     "title": "Charged Icon",
-                    "description": "Text/icon o display on the left when fully charged",
+                    "description": "Text/icon to display on the left when fully charged",
                     "default": ""
-                  },
-                  "color_background": {
-                    "type": "boolean",
-                    "title": "Color Background",
-                    "description": "Color the background or foreground",
-                    "default": false
-                  },
-                  "charged_color": { "$ref": "#/definitions/color" },
-                  "charging_color": { "$ref": "#/definitions/color" },
-                  "discharging_color": { "$ref": "#/definitions/color" },
-                  "display_charging": {
-                    "type": "boolean",
-                    "title": "Display while charging",
-                    "description": "displays the battery status while charging (Charging or Full)",
-                    "default": true
                   },
                   "template": {
                     "$ref": "#/definitions/template"
@@ -432,6 +410,9 @@
                   },
                   "missing_command_text": {
                     "$ref": "#/definitions/missing_command_text"
+                  },
+                  "enable_hyperlink": {
+                    "$ref": "#/definitions/enable_hyperlink"
                   }
                 }
               }
@@ -450,6 +431,9 @@
             "properties": {
               "properties": {
                 "properties": {
+                  "template": {
+                    "$ref": "#/definitions/template"
+                  },
                   "var_name": {
                     "type": "string",
                     "title": "Variable Name",
@@ -473,30 +457,14 @@
             "properties": {
               "properties": {
                 "properties": {
-                  "display_exit_code": {
-                    "type": "boolean",
-                    "title": "Display Exit Code",
-                    "description": "Show or hide the exit code",
-                    "default": true
-                  },
                   "always_enabled": {
                     "type": "boolean",
                     "title": "Always Enabled",
                     "description": "Always show the status",
                     "default": false
                   },
-                  "color_background": {
-                    "type": "boolean",
-                    "title": "Color Background",
-                    "description": "Color the background or foreground",
-                    "default": false
-                  },
-                  "error_color": { "$ref": "#/definitions/color" },
-                  "always_numeric": {
-                    "type": "boolean",
-                    "title": "Always Numeric",
-                    "description": "Always display the exit code as a number",
-                    "default": false
+                  "template": {
+                    "$ref": "#/definitions/template"
                   }
                 }
               }
@@ -515,17 +483,38 @@
             "properties": {
               "properties": {
                 "properties": {
+                  "template": {
+                    "$ref": "#/definitions/template"
+                  },
+                  "fetch_status": {
+                    "type": "boolean",
+                    "title": "Display Status",
+                    "description": "Display the local changes or not",
+                    "default": true
+                  },
+                  "fetch_stash_count": {
+                    "type": "boolean",
+                    "title": "Display Stash Count",
+                    "description": "Display the stash count or not",
+                    "default": false
+                  },
+                  "fetch_worktree_count": {
+                    "type": "boolean",
+                    "title": "Display Worktree Count",
+                    "description": "Display the worktree count or not",
+                    "default": false
+                  },
+                  "fetch_upstream_icon": {
+                    "type": "boolean",
+                    "title": "Display Upstream Icon",
+                    "description": "Display upstream icon or not",
+                    "default": false
+                  },
                   "branch_icon": {
                     "type": "string",
                     "title": "Branch Icon",
                     "description": "The icon to use in front of the git branch name",
                     "default": "\uE0A0 "
-                  },
-                  "display_branch_status": {
-                    "type": "boolean",
-                    "title": "Display Branch Status",
-                    "description": "Display the branch status or not",
-                    "default": true
                   },
                   "branch_identical_icon": {
                     "type": "string",
@@ -550,48 +539,6 @@
                     "title": "Branch Gone Icon",
                     "description": "The icon to display when there's no remote branch",
                     "default": "\u2262"
-                  },
-                  "display_status": {
-                    "type": "boolean",
-                    "title": "Display Status",
-                    "description": "Display the local changes or not",
-                    "default": true
-                  },
-                  "display_status_detail": {
-                    "type": "boolean",
-                    "title": "Display Status Detail",
-                    "description": "Display the local changes in detail or not",
-                    "default": true
-                  },
-                  "display_stash_count": {
-                    "type": "boolean",
-                    "title": "Display Stash Count",
-                    "description": "Display the stash count or not",
-                    "default": false
-                  },
-                  "status_separator_icon": {
-                    "type": "string",
-                    "title": "Status Separator Icon",
-                    "description": "Icon/text to display between staging and working area changes",
-                    "default": " | "
-                  },
-                  "local_working_icon": {
-                    "type": "string",
-                    "title": "Local Working Icon",
-                    "description": "The icon to display in front of the working area changes",
-                    "default": "\uF044"
-                  },
-                  "local_staged_icon": {
-                    "type": "string",
-                    "title": "Local Staged Icon",
-                    "description": "The icon to display in front of the staged area changes",
-                    "default": "\uF046"
-                  },
-                  "stash_count_icon": {
-                    "type": "string",
-                    "title": "Stash Count Icon",
-                    "description": "The icon to display before the stash context",
-                    "default": "\uF692"
                   },
                   "commit_icon": {
                     "type": "string",
@@ -635,12 +582,6 @@
                     "description": "Icon/text to display when there are no commits in the repo",
                     "default": "\uF594"
                   },
-                  "display_upstream_icon": {
-                    "type": "boolean",
-                    "title": "Display Upstream Icon",
-                    "description": "Display upstream icon or not",
-                    "default": false
-                  },
                   "github_icon": {
                     "type": "string",
                     "title": "Github Icon",
@@ -671,28 +612,6 @@
                     "description": "Icon/text to display when the upstream is not known/mapped",
                     "default": "\uE5FB"
                   },
-                  "working_color": { "$ref": "#/definitions/color" },
-                  "staging_color": { "$ref": "#/definitions/color" },
-                  "status_colors_enabled": {
-                    "type": "boolean",
-                    "title": "Status Colors Enabled",
-                    "description": "Color the segment based on the repository status",
-                    "default": false
-                  },
-                  "color_background": {
-                    "type": "boolean",
-                    "title": "Color Background",
-                    "description": "Color the background or foreground",
-                    "default": true
-                  },
-                  "local_changes_color": {
-                    "$ref": "#/definitions/color"
-                  },
-                  "ahead_and_behind_color": {
-                    "$ref": "#/definitions/color"
-                  },
-                  "behind_color": { "$ref": "#/definitions/color" },
-                  "ahead_color": { "$ref": "#/definitions/color" },
                   "branch_max_length": {
                     "type": "integer",
                     "title": "Branch max length",
@@ -724,6 +643,9 @@
                   },
                   "missing_command_text": {
                     "$ref": "#/definitions/missing_command_text"
+                  },
+                  "enable_hyperlink": {
+                    "$ref": "#/definitions/enable_hyperlink"
                   }
                 }
               }
@@ -750,6 +672,9 @@
                   },
                   "missing_command_text": {
                     "$ref": "#/definitions/missing_command_text"
+                  },
+                  "enable_hyperlink": {
+                    "$ref": "#/definitions/enable_hyperlink"
                   }
                 }
               }
@@ -776,6 +701,9 @@
                   },
                   "missing_command_text": {
                     "$ref": "#/definitions/missing_command_text"
+                  },
+                  "enable_hyperlink": {
+                    "$ref": "#/definitions/enable_hyperlink"
                   }
                 }
               }
@@ -802,6 +730,38 @@
                   },
                   "missing_command_text": {
                     "$ref": "#/definitions/missing_command_text"
+                  },
+                  "enable_hyperlink": {
+                    "$ref": "#/definitions/enable_hyperlink"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": { "const": "php" }
+            }
+          },
+          "then": {
+            "title": "PHP Segment",
+            "description": "https://ohmyposh.dev/docs/php",
+            "properties": {
+              "properties": {
+                "properties": {
+                  "display_version": {
+                    "$ref": "#/definitions/display_version"
+                  },
+                  "display_mode": {
+                    "$ref": "#/definitions/display_mode"
+                  },
+                  "missing_command_text": {
+                    "$ref": "#/definitions/missing_command_text"
+                  },
+                  "enable_hyperlink": {
+                    "$ref": "#/definitions/enable_hyperlink"
                   }
                 }
               }
@@ -815,7 +775,7 @@
             }
           },
           "then": {
-            "title": "Julia Segment",
+            "title": "Java Segment",
             "description": "https://ohmyposh.dev/docs/java",
             "properties": {
               "properties": {
@@ -906,6 +866,12 @@
                     "title": "Display Error",
                     "description": "Show the error context when failing to retrieve the kubectl information",
                     "default": false
+                  },
+                  "parse_kubeconfig": {
+                    "type": "boolean",
+                    "title": "Parse kubeconfig",
+                    "description": "Parse kubeconfig files instead of calling out to kubectl to improve performance.",
+                    "default": false
                   }
                 }
               }
@@ -976,6 +942,9 @@
                     "title": "NPM Icon",
                     "description": "Icon/text to use for NPM",
                     "default": " \uE71E"
+                  },
+                  "enable_hyperlink": {
+                    "$ref": "#/definitions/enable_hyperlink"
                   }
                 }
               }
@@ -1291,6 +1260,9 @@
                   },
                   "missing_command_text": {
                     "$ref": "#/definitions/missing_command_text"
+                  },
+                  "enable_hyperlink": {
+                    "$ref": "#/definitions/enable_hyperlink"
                   }
                 }
               }
@@ -1383,7 +1355,19 @@
           },
           "then": {
             "title": "Shell Segment",
-            "description": "https://ohmyposh.dev/docs/shell"
+            "description": "https://ohmyposh.dev/docs/shell",
+            "properties": {
+              "properties": {
+                "properties": {
+                  "custom_text": {
+                    "type": "object",
+                    "title": "Custom Text",
+                    "description": "Custom glyph/text for specific shells",
+                    "default": {}
+                  }
+                }
+              }
+            }
           }
         },
         {
@@ -1566,17 +1550,22 @@
                     "title": "units",
                     "description": "Units of measurement. Available values are standard (kelvin), metric (celsius), and imperial (fahrenheit). Default is standard",
                     "default": "standard",
-                    "enum": [
-                      "standard",
-                      "metric",
-                      "imperial"
-                    ]
+                    "enum": ["standard", "metric", "imperial"]
                   },
                   "enable_hyperlink": {
                     "$ref": "#/definitions/enable_hyperlink"
                   },
                   "http_timeout": {
                     "$ref": "#/definitions/http_timeout"
+                  },
+                  "cache_timeout": {
+                    "type": "integer",
+                    "title": "cache timeout",
+                    "description": "The number of minutes the response is cached. A value of 0 disables the cache.",
+                    "default": 10
+                  },
+                  "template": {
+                    "$ref": "#/definitions/template"
                   }
                 }
               }
@@ -1595,6 +1584,9 @@
             "properties": {
               "properties": {
                 "properties": {
+                  "template": {
+                    "$ref": "#/definitions/template"
+                  },
                   "always_enabled": {
                     "type": "boolean",
                     "title": "Always Enabled",
@@ -1637,6 +1629,107 @@
             "title": "Posh-Git Segment",
             "description": "https://ohmyposh.dev/docs/poshgit"
           }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": { "const": "sysinfo" }
+            }
+          },
+          "then": {
+            "title": "Get sysinfo",
+            "description": "https://ohmyposh.dev/docs/sysinfo",
+            "properties": {
+              "properties": {
+                "properties": {
+                  "precision": {
+                    "type": "integer",
+                    "title": "Precision",
+                    "description": "number of decimal places to show",
+                    "default": 0
+                  },
+                  "template": {
+                    "$ref": "#/definitions/template"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": { "const": "angular" }
+            }
+          },
+          "then": {
+            "title": "Angular CLI Segment",
+            "description": "https://ohmyposh.dev/docs/angular",
+            "properties": {
+              "properties": {
+                "properties": {
+                  "display_version": {
+                    "$ref": "#/definitions/display_version"
+                  },
+                  "display_mode": {
+                    "$ref": "#/definitions/display_mode"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": { "const": "wifi" }
+            }
+          },
+          "then": {
+            "title": "WiFi Segment",
+            "description": "https://ohmyposh.dev/docs/wifi",
+            "properties": {
+              "properties": {
+                "properties": {
+                  "template": {
+                    "$ref": "#/definitions/template"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": { "const": "winreg" }
+            }
+          },
+          "then": {
+            "title": "Windows Registry Query",
+            "description": "https://ohmyposh.dev/docs/winreg",
+            "properties": {
+              "properties": {
+                "properties": {
+                  "template": {
+                    "$ref": "#/definitions/template"
+                  },
+                  "path": {
+                    "type": "string",
+                    "title": "Registry Path",
+                    "description": "The path under which the registy key lives (case insensitive, must use backslashes), e.g. HKLM\\Software\\Microsoft\\Windows NT\\CurrentVersion",
+                    "default": ""
+                  },
+                  "key": {
+                    "type": "string",
+                    "title": "Registry Key",
+                    "description": "The key under he registry path to get (case insensitive).  If left blank, will get the value of the (Default) key in the registry_path",
+                    "default": ""
+                  }
+                }
+              }
+            }
+          }
         }
       ]
     }
@@ -1646,32 +1739,32 @@
     "final_space": {
       "type": "boolean",
       "title": "Final Space",
-      "description": "https://ohmyposh.dev/docs/configure#general-settings",
+      "description": "https://ohmyposh.dev/docs/config-overview#general-settings",
       "default": true
     },
     "osc99": {
       "type": "boolean",
       "title": "Enable OSC99",
-      "description": "https://ohmyposh.dev/docs/configure#general-settings",
+      "description": "https://ohmyposh.dev/docs/config-overview#general-settings",
       "default": false
     },
     "console_title": {
       "type": "boolean",
       "title": "Console Title",
-      "description": "https://ohmyposh.dev/docs/configure#general-settings",
+      "description": "https://ohmyposh.dev/docs/config-overview#general-settings",
       "default": true
     },
     "console_title_style": {
       "type": "string",
       "title": "Console Title Style",
-      "description": "https://ohmyposh.dev/docs/configure#console-title-style",
+      "description": "https://ohmyposh.dev/docs/config-title#console-title-style",
       "enum": ["folder", "path", "template"],
       "default": "folder"
     },
     "console_title_template": {
       "type": "string",
       "title": "Console Title Template",
-      "description": "https://ohmyposh.dev/docs/configure#console-title-template",
+      "description": "https://ohmyposh.dev/docs/config-title#console-title-template",
       "default": "{{ .Shell }} in {{ .Folder }}"
     },
     "terminal_background": { "$ref": "#/definitions/color" },
@@ -1679,7 +1772,7 @@
       "type": "array",
       "title": "Block array",
       "default": [],
-      "description": "https://ohmyposh.dev/docs/configure",
+      "description": "https://ohmyposh.dev/docs/config-overview",
       "items": { "$ref": "#/definitions/block" }
     },
     "tooltips": {
@@ -1714,6 +1807,15 @@
         },
         "background": { "$ref": "#/definitions/color" },
         "foreground": { "$ref": "#/definitions/color" }
+      }
+    },
+    "palette": {
+      "type": "object",
+      "title": "Palette",
+      "description": "https://ohmyposh.dev/docs/config-colors#palette",
+      "default": {},
+      "patternProperties": {
+        ".*": { "$ref": "#/definitions/color" }
       }
     }
   }

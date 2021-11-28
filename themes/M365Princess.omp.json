@@ -10,7 +10,7 @@
           "type": "session",
           "style": "diamond",
           "foreground": "#ffffff",
-          "background": "#B4009E",
+          "background": "#9A348E",
           "leading_diamond": "\uE0B6",
           "trailing_diamond": "",
           "properties": {
@@ -22,8 +22,8 @@
           "type": "path",
           "style": "powerline",
           "powerline_symbol": "\uE0B0",
-          "foreground": "#000000",
-          "background": "#FFFF00",
+          "foreground": "#ffffff",
+          "background": "#DA627D",
           "properties": {
             "style": "folder"
           }
@@ -33,12 +33,12 @@
           "style": "powerline",
           "powerline_symbol": "\uE0B0",
           "foreground": "#ffffff",
-          "background": "#4E44FF",
+          "background": "#FCA17D",
           "properties": {
             "fetch_stash_count": true,
-            "fetch_status": false,
             "fetch_upstream_icon": true,
             "branch_icon": "",
+            "fetch_status": false,
             "template": "{{ .UpstreamIcon }}{{ .HEAD }}{{ if gt .StashCount 0 }} \uF692 {{ .StashCount }}{{ end }}",
             "prefix": " \u279C (",
             "postfix": ") "
@@ -49,7 +49,7 @@
           "style": "powerline",
           "powerline_symbol": "\uE0B0",
           "foreground": "#ffffff",
-          "background": "#4e903d",
+          "background": "#86BBD8",
           "properties": {
             "prefix": " \uE718 "
           }
@@ -59,7 +59,7 @@
           "style": "diamond",
           "trailing_diamond": "\uE0B0",
           "foreground": "#ffffff",
-          "background": "#16C60C",
+          "background": "#33658A",
           "properties": {
             "prefix": " \u2665 ",
             "time_format": "15:04"
