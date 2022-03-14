@@ -82,7 +82,7 @@ def communicate(command: str, stdin: str = ""):
     """
 
     process = subprocess.Popen(command, stdout=subprocess.PIPE,
-                               stdin=subprocess.PIPE, shell=True, universal_newlines=True, encoding="utf-8")
+                               stdin=subprocess.PIPE, universal_newlines=True, encoding="utf-8")
     process.stdin.write(stdin)
     output = process.communicate()[0]
 
@@ -103,7 +103,8 @@ def run_command(command: str):
     """
 
     try:
-        return os.system(command)
+
+        return subprocess.call(command)
 
     except:
         print("Not found")
@@ -323,7 +324,7 @@ class Shell(PromptSession):
                 except:
                     try:
                         output = eval(userInput)
-                        if type(output) not in [object, type(dir), type(__class__)]:
+                        if type(output) not in [object, type(dir), type(self.__class__)]:
                             result = output
                             return_code = 0
                         else:

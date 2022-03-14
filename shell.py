@@ -1,7 +1,6 @@
 import platform
 import os
 import pip
-import warnings
 
 # from pyupdater.client import Client
 # from pyupdater.client.updates import LibUpdate

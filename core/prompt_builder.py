@@ -174,6 +174,7 @@ def handle_hex_colors(text):
         r"(<#[0-9a-fA-F]{6}>)|(<[a-zA-Z]*>)|(<#[0-9a-fA-F]{6},[a-zA-Z]*>)|(<[a-zA-Z]*,#[0-9a-fA-F]{6}>)|(<[a-zA-Z]*,[a-zA-Z]*>)")
     found = re.findall(pattern, text)
 
+    # TODO: fix this, only first found is used
     found = [i for i in list(found[0]) if i != ''] if found else []
 
     print(found) if found else ""
@@ -196,7 +197,7 @@ def handle_hex_colors(text):
         if bg:
             if bg.strip() in constants.disabled_colors:
                 bg = None
-                
+
         print(item, _item, (fg, bg))
 
         first = f"fg={_b}{fg}{_b}" if fg else ""
